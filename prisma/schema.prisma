@@ -12,3 +12,125 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id            Int            @id @default(autoincrement())
+  name          String
+  email         String         @unique
+  phoneNumber   String
+  password      String
+  isActive      Boolean        @default(false)
+  bookings      Booking[]
+  notifications Notification[]
+
+  @@map("user")
+}
+
+model Notification {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  name   String
+  detail String
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("notification")
+}
+
+model Airlines {
+  id      Int      @id @default(autoincrement())
+  name    String
+  flights Flight[]
+
+  @@map("airlines")
+}
+
+model Airports {
+  id       Int      @id @default(autoincrement())
+  name     String
+  city     String
+  terminal String
+  flights  Flight[]
+
+  @@map("airports")
+}
+
+model Flight {
+  id          Int      @id @default(autoincrement())
+  airlinesId  Int
+  airportId   Int
+  departure   DateTime
+  return      DateTime
+  price       Decimal
+  capacity    Int
+  class       String
+  information String
+
+  airlines Airlines  @relation(fields: [airlinesId], references: [id])
+  airport  Airports  @relation(fields: [airportId], references: [id])
+  seats    Seat[]
+  bookings Booking[]
+
+  @@map("flight")
+}
+
+model Seat {
+  id          Int        @id @default(autoincrement())
+  flightId    Int
+  passengerId Int?
+  status      SeatStatus @default(available)
+  seatNumber  String
+
+  flight           Flight             @relation(fields: [flightId], references: [id])
+  passenger        Passenger?         @relation(fields: [passengerId], references: [id])
+  BookingPassenger BookingPassenger[]
+
+  @@map("seat")
+}
+
+enum SeatStatus {
+  booked
+  available
+}
+
+model Booking {
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  flightId       Int
+  bookingDate    DateTime
+  totalPrice     Decimal
+  totalPassenger Int
+
+  user       User               @relation(fields: [userId], references: [id])
+  flight     Flight             @relation(fields: [flightId], references: [id])
+  passengers BookingPassenger[]
+
+  @@map("booking")
+}
+
+model BookingPassenger {
+  id          Int @id @default(autoincrement())
+  bookingId   Int
+  passengerId Int
+  seatId      Int
+
+  booking   Booking   @relation(fields: [bookingId], references: [id])
+  passenger Passenger @relation(fields: [passengerId], references: [id])
+  seat      Seat      @relation(fields: [seatId], references: [id])
+
+  @@map("booking_passenger")
+}
+
+model Passenger {
+  id             Int                @id @default(autoincrement())
+  firstName      String
+  lastName       String
+  birthDate      DateTime
+  nationality    String
+  passportNumber String
+  passportExpiry DateTime
+  bookings       BookingPassenger[]
+  Seat           Seat[]
+
+  @@map("passenger")
+}
