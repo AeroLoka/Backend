@@ -48,7 +48,7 @@ model Airlines {
 model Airports {
   id        Int    @id @default(autoincrement())
   name      String
-  cityId    Int 
+  cityId    Int
   terminal  String
   continent String
 
@@ -58,33 +58,39 @@ model Airports {
   @@map("airports")
 }
 
-model City {
-  id        Int        @id @default(autoincrement())
-  shortname String
-  fullname  String
-  Airports  Airports[]
-
-  @@map("city")
-}
-
 model Flight {
-  id          Int      @id @default(autoincrement())
-  airlinesId  Int
-  airportId   Int
-  departure   DateTime
-  return      DateTime
-  price       Decimal
-  capacity    Int
-  class       String
-  information String
-  duration    Int
+  id                Int      @id @default(autoincrement())
+  airlinesId        Int
+  airportId         Int
+  originCityId      Int
+  destinationCityId Int
+  departure         DateTime
+  return            DateTime
+  price             Decimal
+  capacity          Int
+  class             String
+  information       String
+  duration          Int
 
-  airlines Airlines  @relation(fields: [airlinesId], references: [id])
-  airport  Airports  @relation(fields: [airportId], references: [id])
-  seats    Seat[]
-  bookings Booking[]
+  airlines        Airlines  @relation(fields: [airlinesId], references: [id])
+  airport         Airports  @relation(fields: [airportId], references: [id])
+  originCity      City      @relation("FlightOriginCity", fields: [originCityId], references: [id])
+  destinationCity City      @relation("FlightDestinationCity", fields: [destinationCityId], references: [id])
+  seats           Seat[]
+  bookings        Booking[]
 
   @@map("flight")
+}
+
+model City {
+  id          Int        @id @default(autoincrement())
+  shortname   String
+  fullname    String
+  Airports    Airports[]
+  flightsFrom Flight[]   @relation("FlightOriginCity")
+  flightsTo   Flight[]   @relation("FlightDestinationCity")
+
+  @@map("city")
 }
 
 model Seat {
