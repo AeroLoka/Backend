@@ -46,13 +46,25 @@ model Airlines {
 }
 
 model Airports {
-  id       Int      @id @default(autoincrement())
-  name     String
-  city     String
-  terminal String
-  flights  Flight[]
+  id        Int    @id @default(autoincrement())
+  name      String
+  cityId    Int 
+  terminal  String
+  continent String
+
+  city    City     @relation(fields: [cityId], references: [id])
+  flights Flight[]
 
   @@map("airports")
+}
+
+model City {
+  id        Int        @id @default(autoincrement())
+  shortname String
+  fullname  String
+  Airports  Airports[]
+
+  @@map("city")
 }
 
 model Flight {
@@ -65,6 +77,7 @@ model Flight {
   capacity    Int
   class       String
   information String
+  duration    Int
 
   airlines Airlines  @relation(fields: [airlinesId], references: [id])
   airport  Airports  @relation(fields: [airportId], references: [id])
