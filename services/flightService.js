@@ -3,29 +3,28 @@ const prisma = new PrismaClient();
 
 // INI SEARCHING
 const search = async (criteria, value) => {
-    switch (criteria) {
-        case 'benua':
-            return prisma.airports.findMany({
-                where: { continent: value },
-                distinct: ['continent'],
-            });
-        case 'kelas':
-            return prisma.flight.findMany({
-                where: { class: value },
-                distinct: ['class'],
-            });
-        case 'kota':
-            return prisma.city.findMany({
-                where: { fullname: value },
-                distinct: ['fullname'],
-            });
-        case 'negara':
-            return prisma.airports.findMany({
-                where: { city: { fullname: value } },
-                distinct: ['city'],
-            });
-        default:
-            return [];
+    if (criteria === 'benua') {
+        return prisma.airports.findMany({
+            where: { continent: value },
+            distinct: ['continent'],
+        });
+    } else if (criteria === 'kelas') {
+        return prisma.flight.findMany({
+            where: { class: value },
+            distinct: ['class'],
+        });
+    } else if (criteria === 'kota') {
+        return prisma.city.findMany({
+            where: { fullname: value },
+            distinct: ['fullname'],
+        });
+    } else if (criteria === 'negara') {
+        return prisma.airports.findMany({
+            where: { city: { fullname: value } },
+            distinct: ['city'],
+        });
+    } else {
+        return [];
     }
 };
 
