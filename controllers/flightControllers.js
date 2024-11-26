@@ -5,6 +5,8 @@ const Joi = require("joi");
 const flightSchema = Joi.object({
     airlinesId: Joi.number().required(),
     airportId: Joi.number().required(),
+    originCityId: Joi.number().required(),
+    destinationCityId: Joi.number().required(),
     departure: Joi.date().required(),
     return: Joi.date().required(),
     price: Joi.number().required(),
@@ -21,6 +23,11 @@ exports.getAllFlights = async (req, res) => {
             message: "Data retrieved successfully",
             data: flights,
         });
+
+        if (flights.length === 0) {
+            return res.status(404).json({ error: "No flights found" });
+        }
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
@@ -39,6 +46,8 @@ exports.getFlightById = async (req, res) => {
             include: {
                 airlines: true,
                 airport: true,
+                originCity: true,
+                destinationCity: true,
             },
         });
 
@@ -67,6 +76,8 @@ exports.createFlight = async (req, res) => {
             data: {
                 airlinesId: req.body.airlinesId,
                 airportId: req.body.airportId,
+                originCityId: req.body.originCityId,
+                destinationCityId: req.body.destinationCityId,
                 departure: new Date(req.body.departure),
                 return: new Date(req.body.return),
                 price: req.body.price,
@@ -104,6 +115,8 @@ exports.updateFlight = async (req, res) => {
             data: {
                 airlinesId: req.body.airlinesId,
                 airportId: req.body.airportId,
+                originCityId: req.body.originCityId,
+                destinationCityId: req.body.destinationCityId,
                 departure: new Date(req.body.departure),
                 return: new Date(req.body.return),
                 price: req.body.price,
@@ -114,15 +127,16 @@ exports.updateFlight = async (req, res) => {
             },
         });
 
+        if (!flight) {
+            return res.status(404).json({ error: "Flight not found" });
+        }
+
         res.status(200).json({
             message: "Resource updated successfully",
             data: flight,
         });
     } catch (error) {
         console.error(error);
-        if (error.code === "P2025") {
-            return res.status(404).json({ error: "Flight not found" });
-        }
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
