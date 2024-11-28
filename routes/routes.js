@@ -1,9 +1,10 @@
-const { createBooking } = require('../controllers/transaction-controller');
+const { createBooking, getAllBookingsByUserId } = require('../controllers/transaction-controller');
 const { getFlights } = require('../controllers/flightController');
 const routes = require('express').Router();
 const airfareController = require('../controllers/airfareControllers');
 
 routes.post('/api/booking', createBooking);
+routes.get('/api/booking/userId', getAllBookingsByUserId)
 routes.get('/api/search-flights', getFlights);
 
 routes.get('/api/flights/', airfareController.getAllFlights);
