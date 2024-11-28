@@ -1,19 +1,16 @@
 const express = require('express');
 const morgan = require('morgan');
-const flightRoutes = require('./routes/flightRoutes');
 const PORT = 3000;
 
 const app = express();
+const router = require('./routes/routes');
 
 app.use(morgan('dev'));
-
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use('/', router);
 
-app.use('/api', flightRoutes);
 
-app.get('/', (req, res) => {
-    res.send('Hello, AeroLoka!');
-});
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
