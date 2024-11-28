@@ -4,15 +4,6 @@ const prisma = new PrismaClient();
 const createBooking = async (req, res) => {
   const { email, flightId, totalPrice, passengers, seats } = req.body;
 
-  // Validate input
-  if (!email || !flightId || !totalPrice || !passengers || !seats || seats.length === 0) {
-    return res.status(400).json({
-      status: 400,
-      message: 'Missing required fields',
-      data: null,
-    });
-  }
-
   try {
     // Step 1: Check if the user exists
     const user = await prisma.user.findUnique({
@@ -124,6 +115,9 @@ const createBooking = async (req, res) => {
       status: 201,
       message: 'Booking created successfully',
       data: {
+        name: user.name,
+        email: user.email,
+        email: user.phoneNumber,
         bookingId: booking.id,
         totalPrice,
         bookingDate: new Date(),
@@ -142,4 +136,58 @@ const createBooking = async (req, res) => {
   }
 };
 
-module.exports = { createBooking };
+const getAllBookingsByUserId = async (req, res) => {
+  const { userId } = req.params;
+  const userIdNumber = Number(userId);
+
+  try {
+    // Step 1: Check if the user exists
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userIdNumber,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        status: 404,
+        message: 'User not found',
+        data: null,
+      });
+    }
+
+    // Step 2: Fetch all bookings by the user
+    const bookings = await prisma.booking.findMany({
+      where: {
+        userId: userIdNumber,
+      },
+      include: {
+        flight: true,
+        passengers: true,
+      },
+    });
+
+    if (bookings.length === 0) {
+      return res.status(404).json({
+        status: 404,
+        message: 'No bookings found for this user',
+        data: null,
+      });
+    }
+
+    res.status(200).json({
+      status: 200,
+      message: 'Bookings retrieved successfully',
+      data: bookings,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: 500,
+      message: error.message,
+      data: null,
+    });
+  }
+};
+
+module.exports = { createBooking, getAllBookingsByUserId };
