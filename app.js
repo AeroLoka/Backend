@@ -10,7 +10,7 @@ app.use(morgan('dev'));
 
 app.use(express.json());
 
-app.use('/api/v1/flights', flightRoutes);
+app.use('/', flightRoutes);
 
 app.get('/', (req, res) => {
     res.send('Hello, AeroLoka!');

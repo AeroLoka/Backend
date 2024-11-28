@@ -5,11 +5,11 @@ routes.get('/flightroutes', (req, res) => {
     res.send('AeroLoka! Flight Routes');
 })
 
-routes.get('/', flightController.getAllFlights);
-routes.get('/:id', flightController.getFlightById);
-routes.post('/', flightController.createFlight);
-routes.put('/:id', flightController.updateFlight);
-routes.delete('/:id', flightController.deleteFlight);
+routes.get('/api/flights/', flightController.getAllFlights);
+routes.get('/api/flights/:id', flightController.getFlightById);
+routes.post('/api/flights/', flightController.createFlight);
+routes.put('/api/flights/:id', flightController.updateFlight);
+routes.delete('/api/flights/:id', flightController.deleteFlight);
 
 
 module.exports = routes;
