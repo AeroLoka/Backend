@@ -15,9 +15,9 @@ const bookingSchema = Joi.object({
         passportExpiry: Joi.date().iso().required(),
       })
     )
-    .min(1) 
+    .min(1)
     .required(),
-  seats: Joi.array().items(Joi.string().required()).min(1).required(), // Ensure at least one seat is provided
+  seats: Joi.array().items(Joi.string().required()).min(1).required(),
 });
 
 module.exports = { bookingSchema };
