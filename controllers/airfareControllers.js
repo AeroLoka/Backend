@@ -3,24 +3,49 @@ const prisma = new PrismaClient();
 
 const flightSchema = require('../validations/flight-validations');
 
-exports.getAllFlights = async (req, res) => {
+const getAllFlights = async (req, res) => {
+  const { limit = 10, page = 1 } = req.query;
+  const take = parseInt(limit);
+  const skip = (parseInt(page) - 1) * take;
+
   try {
-    const flights = await prisma.flight.findMany();
-    res.status(200).json({
-      message: 'Data retrieved successfully',
-      data: flights,
+    const flights = await prisma.flight.findMany({
+      skip,
+      take,
     });
 
+    const totalFlights = await prisma.flight.count();
+
     if (flights.length === 0) {
-      return res.status(404).json({ error: 'No flights found' });
+      return res.status(404).json({
+        status: 404,
+        message: 'No flights found',
+        data: null,
+      });
     }
+
+    res.status(200).json({
+      status: 200,
+      message: 'Data retrieved successfully',
+      data: flights,
+      meta: {
+        total: totalFlights,
+        page: parseInt(page),
+        limit: take,
+        totalPages: Math.ceil(totalFlights / take),
+      },
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({
+      status: 500,
+      message: 'Internal Server Error',
+      data: null,
+    });
   }
 };
 
-exports.getFlightById = async (req, res) => {
+const getFlightById = async (req, res) => {
   try {
     const flightId = Number(req.params.id);
     if (isNaN(flightId)) {
@@ -51,7 +76,7 @@ exports.getFlightById = async (req, res) => {
   }
 };
 
-exports.createFlight = async (req, res) => {
+const createFlight = async (req, res) => {
   const { error } = flightSchema.validate(req.body);
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
@@ -84,7 +109,7 @@ exports.createFlight = async (req, res) => {
   }
 };
 
-exports.updateFlight = async (req, res) => {
+const updateFlight = async (req, res) => {
   const { error } = flightSchema.validate(req.body);
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
@@ -127,7 +152,7 @@ exports.updateFlight = async (req, res) => {
   }
 };
 
-exports.deleteFlight = async (req, res) => {
+const deleteFlight = async (req, res) => {
   try {
     const flightId = Number(req.params.id);
     if (isNaN(flightId)) {
@@ -150,3 +175,5 @@ exports.deleteFlight = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+module.exports = { createFlight, deleteFlight, getAllFlights, getFlightById, updateFlight };

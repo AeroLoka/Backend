@@ -1,16 +1,22 @@
 const { createBooking, getAllBookingsByUserId } = require('../controllers/transaction-controller');
 const { getFlights } = require('../controllers/flightController');
+const {
+  getAllFlights,
+  getFlightById,
+  createFlight,
+  updateFlight,
+  deleteFlight,
+} = require('../controllers/airfareControllers');
 const routes = require('express').Router();
-const airfareController = require('../controllers/airfareControllers');
 
 routes.post('/api/booking', createBooking);
-routes.get('/api/booking/userId', getAllBookingsByUserId)
+routes.get('/api/booking/:userId', getAllBookingsByUserId);
 routes.get('/api/search-flights', getFlights);
 
-routes.get('/api/flights/', airfareController.getAllFlights);
-routes.get('/api/flights/:id', airfareController.getFlightById);
-routes.post('/api/flights/', airfareController.createFlight);
-routes.put('/api/flights/:id', airfareController.updateFlight);
-routes.delete('/api/flights/:id', airfareController.deleteFlight);
+routes.get('/api/flights/', getAllFlights);
+routes.get('/api/flights/:id', getFlightById);
+routes.post('/api/flights/', createFlight);
+routes.put('/api/flights/:id', updateFlight);
+routes.delete('/api/flights/:id', deleteFlight);
 
 module.exports = routes;
