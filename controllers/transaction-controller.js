@@ -117,7 +117,7 @@ const createBooking = async (req, res) => {
       data: {
         name: user.name,
         email: user.email,
-        email: user.phoneNumber,
+        phoneNumber: user.phoneNumber,
         bookingId: booking.id,
         totalPrice,
         bookingDate: new Date(),

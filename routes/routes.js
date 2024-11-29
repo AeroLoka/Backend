@@ -10,7 +10,7 @@ const {
 const routes = require('express').Router();
 
 routes.post('/api/booking', createBooking);
-routes.get('/api/booking/userId', getAllBookingsByUserId);
+routes.get('/api/booking/:userId', getAllBookingsByUserId);
 routes.get('/api/search-flights', getFlights);
 
 routes.get('/api/flights/', getAllFlights);
