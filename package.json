@@ -9,14 +9,18 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "\u0000 \u0000",
   "dependencies": {
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "joi": "^17.13.3",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.7",
     "prisma": "^5.22.0"
+  },
+  "prisma": {
+    "seed": "node seed.js"
   }
 }
