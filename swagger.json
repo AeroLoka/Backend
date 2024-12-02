@@ -1,0 +1,290 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Flight Management API",
+    "version": "1.0.0",
+    "description": "API documentation for managing flights."
+  },
+  "paths": {
+    "/flights": {
+      "get": {
+        "summary": "Get all flights",
+        "description": "Retrieve a paginated list of flights.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of flights per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlightResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No flights found."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a flight",
+        "description": "Add a new flight to the database.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Flight"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Flight created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Flight"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      }
+    },
+    "/flights/{id}": {
+      "get": {
+        "summary": "Get flight by ID",
+        "description": "Retrieve a single flight by its ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the flight.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Flight"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid flight ID."
+          },
+          "404": {
+            "description": "Flight not found."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      },
+      "put": {
+        "summary": "Update flight",
+        "description": "Update an existing flight.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the flight to update.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Flight"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Flight updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Flight"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid flight ID or request body."
+          },
+          "404": {
+            "description": "Flight not found."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete flight",
+        "description": "Delete a flight by its ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the flight to delete.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Flight deleted successfully."
+          },
+          "400": {
+            "description": "Invalid flight ID."
+          },
+          "404": {
+            "description": "Flight not found."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Flight": {
+        "type": "object",
+        "properties": {
+          "airlinesId": {
+            "type": "integer"
+          },
+          "airportId": {
+            "type": "integer"
+          },
+          "originCityId": {
+            "type": "integer"
+          },
+          "destinationCityId": {
+            "type": "integer"
+          },
+          "departure": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "return": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "price": {
+            "type": "number",
+            "format": "float"
+          },
+          "capacity": {
+            "type": "integer"
+          },
+          "class": {
+            "type": "string"
+          },
+          "information": {
+            "type": "string"
+          },
+          "duration": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "airlinesId",
+          "airportId",
+          "originCityId",
+          "destinationCityId",
+          "departure",
+          "price",
+          "capacity",
+          "class"
+        ]
+      },
+      "FlightResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Flight"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer"
+              },
+              "page": {
+                "type": "integer"
+              },
+              "limit": {
+                "type": "integer"
+              },
+              "totalPages": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

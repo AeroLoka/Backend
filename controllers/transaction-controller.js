@@ -1,20 +1,20 @@
 const { PrismaClient } = require('@prisma/client');
+const { bookingSchema } = require('../validations/transaction-validation');
 const prisma = new PrismaClient();
 
 const createBooking = async (req, res) => {
   const { email, flightId, totalPrice, passengers, seats } = req.body;
 
-  // Validate input
-  if (!email || !flightId || !totalPrice || !passengers || !seats || seats.length === 0) {
+  const { error } = bookingSchema.validate(req.body);
+  if (error) {
     return res.status(400).json({
       status: 400,
-      message: 'Missing required fields',
+      message: error.details[0].message,
       data: null,
     });
   }
 
   try {
-    // Step 1: Check if the user exists
     const user = await prisma.user.findUnique({
       where: { email },
     });
@@ -26,7 +26,6 @@ const createBooking = async (req, res) => {
       });
     }
 
-    // Step 2: Check if the flight exists
     const flight = await prisma.flight.findUnique({
       where: { id: flightId },
     });
@@ -38,9 +37,7 @@ const createBooking = async (req, res) => {
       });
     }
 
-    // Step 3: Verify and create seats for each requested seat
     const seatPromises = seats.map(async (seatNumber) => {
-      // Step 3a: Check if the seat already exists and if it's available
       const seat = await prisma.seat.findFirst({
         where: {
           flightId,
@@ -50,21 +47,18 @@ const createBooking = async (req, res) => {
       });
 
       if (!seat) {
-        // Step 3b: Create the seat if it doesn't exist or is not available
         await prisma.seat.create({
           data: {
             flightId,
             seatNumber,
-            status: 'available', // Initially set as available
+            status: 'available',
           },
         });
       }
     });
 
-    // Wait for all seats to be checked/created
     await Promise.all(seatPromises);
 
-    // Step 4: Create the booking
     const booking = await prisma.booking.create({
       data: {
         userId: user.id,
@@ -75,7 +69,6 @@ const createBooking = async (req, res) => {
       },
     });
 
-    // Step 5: Add passengers
     const passengerPromises = passengers.map((passenger) =>
       prisma.passenger.create({
         data: {
@@ -91,7 +84,6 @@ const createBooking = async (req, res) => {
 
     const createdPassengers = await Promise.all(passengerPromises);
 
-    // Step 6: Link passengers and seats to booking in BookingPassenger
     const bookingPassengerPromises = createdPassengers.map(async (createdPassenger, index) =>
       prisma.bookingPassenger.create({
         data: {
@@ -101,17 +93,16 @@ const createBooking = async (req, res) => {
             .findFirst({
               where: {
                 flightId,
-                seatNumber: seats[index], // Matching seat number with the created seat
+                seatNumber: seats[index],
               },
             })
-            .then((seat) => seat.id), // Retrieve the seat ID after creation
+            .then((seat) => seat.id),
         },
       })
     );
 
     await Promise.all(bookingPassengerPromises);
 
-    // Step 7: Update seat status to 'booked'
     await prisma.seat.updateMany({
       where: {
         flightId,
@@ -124,6 +115,9 @@ const createBooking = async (req, res) => {
       status: 201,
       message: 'Booking created successfully',
       data: {
+        name: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
         bookingId: booking.id,
         totalPrice,
         bookingDate: new Date(),
@@ -142,4 +136,56 @@ const createBooking = async (req, res) => {
   }
 };
 
-module.exports = { createBooking };
+const getAllBookingsByUserId = async (req, res) => {
+  const { userId } = req.params;
+  const userIdNumber = Number(userId);
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userIdNumber,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        status: 404,
+        message: 'User not found',
+        data: null,
+      });
+    }
+
+    const bookings = await prisma.booking.findMany({
+      where: {
+        userId: userIdNumber,
+      },
+      include: {
+        flight: true,
+        passengers: true,
+      },
+    });
+
+    if (bookings.length === 0) {
+      return res.status(404).json({
+        status: 404,
+        message: 'No bookings found for this user',
+        data: null,
+      });
+    }
+
+    res.status(200).json({
+      status: 200,
+      message: 'Bookings retrieved successfully',
+      data: bookings,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: 500,
+      message: error.message,
+      data: null,
+    });
+  }
+};
+
+module.exports = { createBooking, getAllBookingsByUserId };

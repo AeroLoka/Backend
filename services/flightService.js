@@ -67,24 +67,24 @@ const searchFlight = async (criteria, value) => {
 
 // INI FILTERING
 const filterFlights = async (filter) => {
-    const filters = {
-        'harga-termurah': { price: 'asc' },
-        'harga-termahal': { price: 'desc' },
-        'durasi-terpendek': { duration: 'asc' },
-        'durasi-terpanjang': { duration: 'desc' },
-        'keberangkatan-paling-awal': { departure: 'asc' },
-        'keberangkatan-paling-akhir': { departure: 'desc' },
-        'kedatangan-paling-awal': { return: 'asc' },
-        'kedatangan-paling-akhir': { return: 'desc' },
-    };
+  const filters = {
+    'harga-termurah': { price: 'asc' },
+    'harga-termahal': { price: 'desc' },
+    'durasi-terpendek': { duration: 'asc' },
+    'durasi-terpanjang': { duration: 'desc' },
+    'keberangkatan-paling-awal': { departure: 'asc' },
+    'keberangkatan-paling-akhir': { departure: 'desc' },
+    'kedatangan-paling-awal': { return: 'asc' },
+    'kedatangan-paling-akhir': { return: 'desc' },
+  };
 
-    if (filters[filter]) {
-        return prisma.flight.findMany({
-            orderBy: filters[filter],
-        });
-    }
+  if (filters[filter]) {
+    return prisma.flight.findMany({
+      orderBy: filters[filter],
+    });
+  }
 
-    return [];
+  return [];
 };
 
 module.exports = {
