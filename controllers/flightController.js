@@ -1,4 +1,4 @@
-const { search, filterFlights } = require('../services/flightService');
+const { searchFlight, filterFlights } = require('../services/flightService');
 
 const validCriteria = ['benua', 'kelas', 'kota', 'negara'];
 const validFilters = [
@@ -21,7 +21,7 @@ const getFlights = async (req, res) => {
         }
 
         if (criteria && value) {
-            flights = await search(criteria, value);
+            flights = await searchFlight(criteria, value);
         } else if (filter) {
             flights = await filterFlights(filter);
         } else {

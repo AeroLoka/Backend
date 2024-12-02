@@ -2,26 +2,63 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 // INI SEARCHING
-const search = async (criteria, value) => {
+const searchFlight = async (criteria, value) => {
     if (criteria === 'benua') {
-        return prisma.airports.findMany({
-            where: { continent: value },
-            distinct: ['continent'],
+        return prisma.flight.findMany({
+            where: {
+                airport: {
+                    continent: value
+                }
+            },
+            distinct: ['class'],
+            include: {
+                originCity: true,
+                destinationCity: true,
+                airlines: true,
+                airport: true,
+            }
         });
     } else if (criteria === 'kelas') {
         return prisma.flight.findMany({
             where: { class: value },
             distinct: ['class'],
+            include: {
+                originCity: true,
+                destinationCity: true,
+                airlines: true,
+                airport: true,
+            }
         });
     } else if (criteria === 'kota') {
-        return prisma.city.findMany({
-            where: { fullname: value },
-            distinct: ['fullname'],
+        return prisma.flight.findMany({
+            where: {
+                OR: [
+                    { originCity: { fullname: value } },
+                    { destinationCity: { fullname: value } }
+                ]
+            },
+            distinct: ['originCityId', 'destinationCityId'],
+            include: {
+                originCity: true,
+                destinationCity: true,
+                airlines: true,
+                airport: true,
+            }
         });
     } else if (criteria === 'negara') {
-        return prisma.airports.findMany({
-            where: { city: { fullname: value } },
-            distinct: ['city'],
+        return prisma.flight.findMany({
+            where: {
+                airport: {
+                    city: { fullname: value }
+                }
+            },
+            distinct: ['class'],
+            include: {
+                originCity: true,
+                destinationCity: true,
+                airlines: true,
+                airport: true,
+            }
         });
     } else {
         return [];
@@ -51,6 +88,6 @@ const filterFlights = async (filter) => {
 };
 
 module.exports = {
-    search,
+    searchFlight,
     filterFlights,
 };
