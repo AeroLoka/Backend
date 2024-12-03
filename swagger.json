@@ -5,31 +5,24 @@
     "version": "1.0.0",
     "description": "API documentation for managing flights."
   },
+  "servers": [
+  {
+    "url": "http://localhost:3000",
+    "description": "Local development server"
+  }
+],
   "paths": {
-    "/flights": {
+    "/api/flights": {
       "get": {
+        "tags": ["Flights"],
         "summary": "Get all flights",
         "description": "Retrieve a paginated list of flights.",
         "parameters": [
           {
-            "name": "limit",
-            "in": "query",
-            "description": "Number of flights per page.",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 10
-            }
+            "$ref": "#/components/parameters/Page"
           },
           {
-            "name": "page",
-            "in": "query",
-            "description": "Page number.",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 1
-            }
+            "$ref": "#/components/parameters/PageLimit"
           }
         ],
         "responses": {
@@ -52,6 +45,7 @@
         }
       },
       "post": {
+        "tags": ["Flights"],
         "summary": "Create a flight",
         "description": "Add a new flight to the database.",
         "requestBody": {
@@ -70,9 +64,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Flight"
+                      "$ref": "#/components/schemas/Flight"
+                  }
                 }
-              }
             }
           },
           "400": {
@@ -84,8 +78,9 @@
         }
       }
     },
-    "/flights/{id}": {
+    "/api/flights/{id}": {
       "get": {
+        "tags": ["Flights"],
         "summary": "Get flight by ID",
         "description": "Retrieve a single flight by its ID.",
         "parameters": [
@@ -105,7 +100,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Flight"
+                  "$ref": "#/components/schemas/GetFlightResponse"
                 }
               }
             }
@@ -122,6 +117,7 @@
         }
       },
       "put": {
+        "tags": ["Flights"],
         "summary": "Update flight",
         "description": "Update an existing flight.",
         "parameters": [
@@ -168,6 +164,7 @@
         }
       },
       "delete": {
+        "tags": ["Flights"],
         "summary": "Delete flight",
         "description": "Delete a flight by its ID.",
         "parameters": [
@@ -196,10 +193,209 @@
           }
         }
       }
+    },
+    "/api/booking": {
+      "post": {
+        "tags": ["Bookings"],
+        "summary": "Create a booking",
+        "description": "Add a new booking to the database.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Booking"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Booking created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      }
+    },
+    "/api/booking/{userId}": {
+      "get": {
+        "tags": ["Bookings"],
+        "summary": "Get bookings by user ID",
+        "description": "Retrieve a list of bookings for a specific user.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "ID of the user.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBookingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/search-flights": {
+      "get": {
+        "tags": ["Search and Filter Flights"],
+        "summary": "Search for flights",
+        "description": "Retrieve a list of flights based on search criteria.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Criteria"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Flights retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Flight"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid criteria or filter provided."
+          },
+          "404": {
+            "description": "No flights found matching the criteria or filter."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
     }
   },
   "components": {
+    "parameters": {
+      "Criteria": {
+        "name": "criteria",
+        "in": "query",
+        "description": "The search criterion to filter flights.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": ["benua", "kelas", "kota", "negara"]
+        }
+      },
+      "Filter": {
+        "name": "filter",
+        "in": "query",
+        "description": "The filter to apply to the flights.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "harga-termurah",
+            "harga-termahal",
+            "durasi-terpendek",
+            "durasi-terpanjang",
+            "keberangkatan-paling-awal",
+            "keberangkatan-paling-akhir",
+            "kedatangan-paling-awal",
+            "kedatangan-paling-akhir"
+          ]
+        }
+      },
+      "Page": {
+        "name": "limit",
+        "in": "query",
+        "description": "Number of flights per page.",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 10
+        }
+      },
+      "PageLimit":{
+        "name": "page",
+        "in": "query",
+        "description": "Page number.",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 1
+        }
+      }
+    },
     "schemas": {
+      "Airline": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Airport": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "cityId": {
+            "type": "integer"
+          },
+          "terminal": {
+            "type": "string"
+          },
+          "continent": {
+            "type": "string"
+          }
+        }
+      },
+      "OriginCity": {
+        "type": "object",
+        "properties": {
+          "shortname": {
+            "type": "string"
+          },
+          "fullname": {
+            "type": "string"
+          }
+        }
+      },
+      "DestinationCity": {
+        "type": "object",
+        "properties": {
+          "shortname": {
+            "type": "string"
+          },
+          "fullname": {
+            "type": "string"
+          }
+        }
+      },
       "Flight": {
         "type": "object",
         "properties": {
@@ -254,12 +450,6 @@
       "FlightResponse": {
         "type": "object",
         "properties": {
-          "status": {
-            "type": "integer"
-          },
-          "message": {
-            "type": "string"
-          },
           "data": {
             "type": "array",
             "items": {
@@ -284,6 +474,171 @@
             }
           }
         }
+      },
+      "GetFlightResponse": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/components/schemas/Flight" },
+        {
+          "type": "object",
+          "properties": {
+            "airlines": { "$ref": "#/components/schemas/Airline" },
+            "airport": { "$ref": "#/components/schemas/Airport" },
+            "originCity": { "$ref": "#/components/schemas/OriginCity" },
+            "destinationCity": { "$ref": "#/components/schemas/DestinationCity" }
+          }
+        }
+      ]
+    },
+      "Booking": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "flightId": {
+            "type": "integer"
+          },
+          "totalPrice": {
+            "type": "number",
+            "format": "float"
+          },
+          "passengers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Passenger"
+            }
+          },
+          "seats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Seat"
+            }
+          }
+        },
+        "required": [
+          "email",
+          "flightId",
+          "totalPrice",
+          "passengers",
+          "seats"
+        ]
+      },
+      "BookingsResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "bookingId": {
+            "type": "integer"
+          },
+          "totalPrice": {
+            "type": "number",
+            "format": "float"
+          },
+          "bookingDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalPassenger": {
+            "type": "integer"
+          },
+          "seats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Seat"
+            }
+          },
+          "passengers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Passenger"
+            }
+          }
+        }
+      },
+      "GetBookingsResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "userId": {
+            "type": "integer"
+          },
+          "flightId": {
+            "type": "integer"
+          },
+          "bookingDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalPrice": {
+            "type": "number",
+            "format": "float"
+          },
+          "totalPassenger": {
+            "type": "integer"
+          },
+          "flight": {
+            "$ref": "#/components/schemas/Flight"
+          },
+          "passengers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "bookingId": {
+                  "type": "integer"
+                },
+                "passengersId": {
+                  "type": "integer"
+                },
+                "seatId": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Passenger": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "nationality": {
+            "type": "string"
+          },
+          "passportNumber": {
+            "type": "string"
+          },
+          "passportExpiry": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "Seat": {
+            "type": "string"
       }
     }
   }
