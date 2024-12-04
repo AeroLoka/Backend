@@ -146,6 +146,31 @@ const createBooking = async (req, res) => {
 const getAllBookingsByUserId = async (req, res) => {
   const { userId } = req.params;
   const userIdNumber = Number(userId);
+  const { from, to, bookingCode } = req.query;
+
+  if (from && isNaN(Date.parse(from))) {
+    return res.status(400).json({
+      status: 400,
+      message: 'Invalid "from" date format',
+      data: null,
+    });
+  }
+
+  if (to && isNaN(Date.parse(to))) {
+    return res.status(400).json({
+      status: 400,
+      message: 'Invalid "to" date format',
+      data: null,
+    });
+  }
+
+  if (from && to && new Date(from) > new Date(to)) {
+    return res.status(400).json({
+      status: 400,
+      message: '"From" date cannot be after "to" date',
+      data: null,
+    });
+  }
 
   try {
     const user = await prisma.user.findUnique({
@@ -162,10 +187,29 @@ const getAllBookingsByUserId = async (req, res) => {
       });
     }
 
+    const filters = {
+      userId: userIdNumber,
+    };
+
+    if (from) {
+      filters.bookingDate = {
+        gte: new Date(from),
+      };
+    }
+
+    if (to) {
+      filters.bookingDate = {
+        ...filters.bookingDate,
+        lte: new Date(to),
+      };
+    }
+
+    if (bookingCode) {
+      filters.bookingCode = bookingCode;
+    }
+
     const bookings = await prisma.booking.findMany({
-      where: {
-        userId: userIdNumber,
-      },
+      where: filters,
       include: {
         flight: true,
         passengers: true,
@@ -180,16 +224,16 @@ const getAllBookingsByUserId = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       status: 200,
       message: 'Bookings retrieved successfully',
       data: bookings,
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({
+    return res.status(500).json({
       status: 500,
-      message: error.message,
+      message: 'Internal Server Error',
       data: null,
     });
   }
