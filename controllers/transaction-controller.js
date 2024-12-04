@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const { bookingSchema } = require('../validations/transaction-validation');
+const { generateUniqueBookingCode } = require('../utils/generateRandomCode');
 const prisma = new PrismaClient();
 
 const createBooking = async (req, res) => {
@@ -59,6 +60,8 @@ const createBooking = async (req, res) => {
 
     await Promise.all(seatPromises);
 
+    const bookingCode = await generateUniqueBookingCode(prisma);
+
     const booking = await prisma.booking.create({
       data: {
         userId: user.id,
@@ -66,6 +69,8 @@ const createBooking = async (req, res) => {
         totalPrice,
         bookingDate: new Date(),
         totalPassenger: passengers.length,
+        status: 'unpaid',
+        bookingCode: bookingCode,
       },
     });
 
@@ -120,6 +125,8 @@ const createBooking = async (req, res) => {
         phoneNumber: user.phoneNumber,
         bookingId: booking.id,
         totalPrice,
+        bookingStatus: booking.status,
+        bookingCode,
         bookingDate: new Date(),
         totalPassenger: passengers.length,
         seats,

@@ -118,7 +118,7 @@ model Booking {
   totalPrice     Decimal
   totalPassenger Int
   status         bookingStatus @default(unpaid)
-  bookingCode    String        @unique @default(uuid())
+  bookingCode    String        @unique
 
   user       User               @relation(fields: [userId], references: [id])
   flight     Flight             @relation(fields: [flightId], references: [id])
