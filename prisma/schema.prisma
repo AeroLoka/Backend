@@ -101,8 +101,6 @@ model Seat {
 
   flight           Flight             @relation(fields: [flightId], references: [id])
   BookingPassenger BookingPassenger[]
-  Passenger        Passenger?         @relation(fields: [passengerId], references: [id])
-  passengerId      Int?
 
   @@map("seat")
 }
@@ -157,7 +155,6 @@ model Passenger {
   passportNumber String
   passportExpiry DateTime
   bookings       BookingPassenger[]
-  Seat           Seat[]
 
   @@map("passenger")
 }
