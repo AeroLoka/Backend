@@ -94,15 +94,15 @@ model City {
 }
 
 model Seat {
-  id          Int        @id @default(autoincrement())
-  flightId    Int
-  passengerId Int?
-  status      SeatStatus @default(available)
-  seatNumber  String
+  id         Int        @id @default(autoincrement())
+  flightId   Int
+  status     SeatStatus @default(available)
+  seatNumber String
 
   flight           Flight             @relation(fields: [flightId], references: [id])
-  passenger        Passenger?         @relation(fields: [passengerId], references: [id])
   BookingPassenger BookingPassenger[]
+  Passenger        Passenger?         @relation(fields: [passengerId], references: [id])
+  passengerId      Int?
 
   @@map("seat")
 }
@@ -113,18 +113,26 @@ enum SeatStatus {
 }
 
 model Booking {
-  id             Int      @id @default(autoincrement())
+  id             Int           @id @default(autoincrement())
   userId         Int
   flightId       Int
   bookingDate    DateTime
   totalPrice     Decimal
   totalPassenger Int
+  status         bookingStatus @default(unpaid)
+  bookingCode    String        @unique @default(uuid())
 
   user       User               @relation(fields: [userId], references: [id])
   flight     Flight             @relation(fields: [flightId], references: [id])
   passengers BookingPassenger[]
 
   @@map("booking")
+}
+
+enum bookingStatus {
+  paid
+  unpaid
+  cancelled
 }
 
 model BookingPassenger {
