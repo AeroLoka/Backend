@@ -8,7 +8,12 @@ const {
   deleteFlight,
 } = require('../controllers/airfareControllers');
 
-const { login, register } = require('../controllers/auth-controler');
+const {
+  login,
+  register,
+  resetPassword,
+  sendEmailForgetPassword,
+} = require('../controllers/auth-controler');
 
 const routes = require('express').Router();
 
@@ -24,5 +29,7 @@ routes.delete('/api/flights/:id', deleteFlight);
 
 routes.post('/api/register', register);
 routes.post('/api/login', login);
+routes.post('/api/forget-password', sendEmailForgetPassword);
+routes.post('/api/reset-password', resetPassword);
 
 module.exports = routes;

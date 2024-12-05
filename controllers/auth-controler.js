@@ -2,6 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { sendMail } = require('../services/mail');
 
 const register = async (req, res) => {
   try {
@@ -86,5 +87,110 @@ const login = async (req, res) => {
   }
 };
 
+const sendEmailForgetPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
 
-module.exports = { register, login };
+    const user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        status: 404,
+        message: 'Email not found',
+        data: null,
+      });
+    }
+
+    const token = jwt.sign({ email: user.email, name: user.name }, process.env.JWT_SECRET);
+
+    const message = `<div>
+      <h1>Silahkan klik tautan dibawah untuk mengganti password</h1>
+      <a href='http://localhost:3000/reset-password/${token}'>Reset Password</a>
+    </div>`;
+
+    sendMail(email, message);
+    return res.status(200).json({
+      status: 200,
+      message: 'Email sent',
+      data: null,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: '500',
+      message: 'Internal Server Error',
+      error: error.message,
+    });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  if (!token) {
+    return res.status(401).json({
+      status: 401,
+      message: 'Unauthorized',
+      data: null,
+    });
+  }
+
+  let email;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({
+        status: 401,
+        message: 'Unauthorized',
+        data: null,
+      });
+    }
+    email = decoded.email;
+    req.user = decoded;
+  });
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        status: 404,
+        message: 'User not found',
+        data: null,
+      });
+    }
+
+    const hashPassword = await bcrypt.hash(password, +process.env.SALT);
+
+    await prisma.user.update({
+      where: {
+        email: email,
+      },
+      data: {
+        password: hashPassword,
+      },
+    });
+
+    return res.status(200).json({
+      status: 200,
+      message: 'Password reset successfully',
+      data: null,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: 500,
+      message: 'Internal Server Error',
+      data: null,
+    });
+  }
+};
+
+module.exports = { resetPassword, sendEmailForgetPassword, register, login };
