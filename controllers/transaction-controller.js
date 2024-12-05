@@ -1,6 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
 const { bookingSchema } = require('../validations/transaction-validation');
-const { generateUniqueBookingCode } = require('../utils/generateRandomCode');
 const prisma = new PrismaClient();
 
 const createBooking = async (req, res) => {
@@ -60,8 +59,6 @@ const createBooking = async (req, res) => {
 
     await Promise.all(seatPromises);
 
-    const bookingCode = await generateUniqueBookingCode(prisma);
-
     const booking = await prisma.booking.create({
       data: {
         userId: user.id,
@@ -69,8 +66,6 @@ const createBooking = async (req, res) => {
         totalPrice,
         bookingDate: new Date(),
         totalPassenger: passengers.length,
-        status: 'unpaid',
-        bookingCode: bookingCode,
       },
     });
 
@@ -125,8 +120,6 @@ const createBooking = async (req, res) => {
         phoneNumber: user.phoneNumber,
         bookingId: booking.id,
         totalPrice,
-        bookingStatus: booking.status,
-        bookingCode,
         bookingDate: new Date(),
         totalPassenger: passengers.length,
         seats,
@@ -146,31 +139,6 @@ const createBooking = async (req, res) => {
 const getAllBookingsByUserId = async (req, res) => {
   const { userId } = req.params;
   const userIdNumber = Number(userId);
-  const { from, to, bookingCode } = req.query;
-
-  if (from && isNaN(Date.parse(from))) {
-    return res.status(400).json({
-      status: 400,
-      message: 'Invalid "from" date format',
-      data: null,
-    });
-  }
-
-  if (to && isNaN(Date.parse(to))) {
-    return res.status(400).json({
-      status: 400,
-      message: 'Invalid "to" date format',
-      data: null,
-    });
-  }
-
-  if (from && to && new Date(from) > new Date(to)) {
-    return res.status(400).json({
-      status: 400,
-      message: '"From" date cannot be after "to" date',
-      data: null,
-    });
-  }
 
   try {
     const user = await prisma.user.findUnique({
@@ -187,29 +155,10 @@ const getAllBookingsByUserId = async (req, res) => {
       });
     }
 
-    const filters = {
-      userId: userIdNumber,
-    };
-
-    if (from) {
-      filters.bookingDate = {
-        gte: new Date(from),
-      };
-    }
-
-    if (to) {
-      filters.bookingDate = {
-        ...filters.bookingDate,
-        lte: new Date(to),
-      };
-    }
-
-    if (bookingCode) {
-      filters.bookingCode = bookingCode;
-    }
-
     const bookings = await prisma.booking.findMany({
-      where: filters,
+      where: {
+        userId: userIdNumber,
+      },
       include: {
         flight: true,
         passengers: true,
@@ -224,16 +173,16 @@ const getAllBookingsByUserId = async (req, res) => {
       });
     }
 
-    return res.status(200).json({
+    res.status(200).json({
       status: 200,
       message: 'Bookings retrieved successfully',
       data: bookings,
     });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
+    res.status(500).json({
       status: 500,
-      message: 'Internal Server Error',
+      message: error.message,
       data: null,
     });
   }
