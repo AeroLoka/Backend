@@ -337,7 +337,7 @@ async function main() {
       {
         airlinesId: 1,
         airportId: 1,
-        departure: new Date("2025-01-04T07:30:00Z"), // Sesuai dengan Reminder 1
+        departure: new Date("2025-01-04T07:30:00Z"), 
         return: new Date("2025-01-04T12:00:00Z"),
         price: 1000000.0,
         capacity: 180,
@@ -350,7 +350,7 @@ async function main() {
       {
         airlinesId: 2,
         airportId: 2,
-        departure: new Date("2025-02-01T10:00:00Z"), // Sesuai dengan Reminder 2
+        departure: new Date("2025-02-01T10:00:00Z"), 
         return: new Date("2025-02-01T14:30:00Z"),
         price: 2000000.0,
         capacity: 150,
@@ -363,7 +363,7 @@ async function main() {
       {
         airlinesId: 3,
         airportId: 3,
-        departure: new Date("2025-03-01T09:00:00Z"), // Sesuai dengan Reminder 3
+        departure: new Date("2025-03-01T09:00:00Z"), 
         return: new Date("2025-03-01T14:00:00Z"),
         price: 1250000.0,
         capacity: 160,
@@ -376,7 +376,7 @@ async function main() {
       {
         airlinesId: 4,
         airportId: 4,
-        departure: new Date("2025-04-01T13:00:00Z"), // Sesuai dengan Reminder 4
+        departure: new Date("2025-04-01T13:00:00Z"), 
         return: new Date("2025-04-01T18:30:00Z"),
         price: 2500000.0,
         capacity: 200,
@@ -389,7 +389,7 @@ async function main() {
       {
         airlinesId: 5,
         airportId: 5,
-        departure: new Date("2025-05-20T05:30:00Z"), // Sesuai dengan Reminder 5
+        departure: new Date("2025-05-20T05:30:00Z"), 
         return: new Date("2025-05-20T09:30:00Z"),
         price: 1000000.0,
         capacity: 100,
@@ -661,21 +661,21 @@ async function main() {
 
   const seats = await prisma.seat.createMany({
     data: [
-      { flightId: 1, passengerId: 1, status: "available", seatNumber: "1A" },
-      { flightId: 1, passengerId: 2, status: "available", seatNumber: "1B" },
-      { flightId: 1, passengerId: 3, status: "available", seatNumber: "1C" },
-      { flightId: 1, passengerId: 4, status: "available", seatNumber: "2A" },
-      { flightId: 1, passengerId: 5, status: "available", seatNumber: "2B" },
-      { flightId: 2, passengerId: 6, status: "available", seatNumber: "1A" },
-      { flightId: 2, passengerId: 7, status: "available", seatNumber: "1B" },
-      { flightId: 2, passengerId: 8, status: "available", seatNumber: "1C" },
-      { flightId: 2, passengerId: 9, status: "available", seatNumber: "2A" },
-      { flightId: 2, passengerId: 10, status: "available", seatNumber: "2B" },
-      { flightId: 3, passengerId: 11, status: "available", seatNumber: "1A" },
-      { flightId: 3, passengerId: 12, status: "available", seatNumber: "1B" },
-      { flightId: 3, passengerId: 13, status: "available", seatNumber: "1C" },
-      { flightId: 3, passengerId: 14, status: "available", seatNumber: "2A" },
-      { flightId: 3, passengerId: 15, status: "available", seatNumber: "2B" },
+      { flightId: 1, status: "available", seatNumber: "1A" },
+      { flightId: 1, status: "available", seatNumber: "1B" },
+      { flightId: 1, status: "available", seatNumber: "1C" },
+      { flightId: 1, status: "available", seatNumber: "2A" },
+      { flightId: 1, status: "available", seatNumber: "2B" },
+      { flightId: 2, status: "available", seatNumber: "1A" },
+      { flightId: 2, status: "available", seatNumber: "1B" },
+      { flightId: 2, status: "available", seatNumber: "1C" },
+      { flightId: 2, status: "available", seatNumber: "2A" },
+      { flightId: 2, status: "available", seatNumber: "2B" },
+      { flightId: 3, status: "available", seatNumber: "1A" },
+      { flightId: 3, status: "available", seatNumber: "1B" },
+      { flightId: 3, status: "available", seatNumber: "1C" },
+      { flightId: 3, status: "available", seatNumber: "2A" },
+      { flightId: 3, status: "available", seatNumber: "2B" },
     ],
   });
   console.log("Seats created:", seats);
@@ -688,6 +688,8 @@ async function main() {
         bookingDate: new Date("2024-12-20T08:00:00Z"),
         totalPrice: 1000000,
         totalPassenger: 1,
+        status: "unpaid",
+        bookingCode: "code1",
       },
       {
         userId: 2,
@@ -695,6 +697,8 @@ async function main() {
         bookingDate: new Date("2024-12-21T09:30:00Z"),
         totalPrice: 4000000,
         totalPassenger: 2,
+        status: "unpaid",
+        bookingCode: "code2",
       },
       {
         userId: 3,
@@ -702,6 +706,8 @@ async function main() {
         bookingDate: new Date("2024-12-22T11:45:00Z"),
         totalPrice: 3750000,
         totalPassenger: 3,
+        status: "unpaid",
+        bookingCode: "code3",
       },
       {
         userId: 4,
@@ -709,6 +715,8 @@ async function main() {
         bookingDate: new Date("2024-12-23T14:15:00Z"),
         totalPrice: 10000000,
         totalPassenger: 4,
+        status: "unpaid",
+        bookingCode: "code4",
       },
       {
         userId: 5,
@@ -716,6 +724,8 @@ async function main() {
         bookingDate: new Date("2024-12-24T16:00:00Z"),
         totalPrice: 7500000,
         totalPassenger: 5,
+        status: "unpaid",
+        bookingCode: "code5",
       },
       {
         userId: 1,
@@ -723,6 +733,8 @@ async function main() {
         bookingDate: new Date("2024-12-20T10:00:00Z"),
         totalPrice: 4000000,
         totalPassenger: 2,
+        status: "unpaid",
+        bookingCode: "code6",
       },
       {
         userId: 2,
@@ -730,6 +742,8 @@ async function main() {
         bookingDate: new Date("2024-12-21T11:30:00Z"),
         totalPrice: 3750000,
         totalPassenger: 1,
+        status: "unpaid",
+        bookingCode: "code7",
       },
       {
         userId: 3,
@@ -737,6 +751,8 @@ async function main() {
         bookingDate: new Date("2024-12-22T12:00:00Z"),
         totalPrice: 10000000,
         totalPassenger: 3,
+        status: "unpaid",
+        bookingCode: "code8",
       },
       {
         userId: 4,
@@ -744,6 +760,8 @@ async function main() {
         bookingDate: new Date("2024-12-23T13:00:00Z"),
         totalPrice: 7500000,
         totalPassenger: 4,
+        status: "unpaid",
+        bookingCode: "code9",
       },
       {
         userId: 5,
@@ -751,6 +769,8 @@ async function main() {
         bookingDate: new Date("2024-12-24T14:30:00Z"),
         totalPrice: 1000000,
         totalPassenger: 5,
+        status: "unpaid",
+        bookingCode: "code10",
       },
       {
         userId: 1,
@@ -758,6 +778,8 @@ async function main() {
         bookingDate: new Date("2024-12-20T15:00:00Z"),
         totalPrice: 3750000,
         totalPassenger: 2,
+        status: "unpaid",
+        bookingCode: "code11",
       },
       {
         userId: 2,
@@ -765,6 +787,8 @@ async function main() {
         bookingDate: new Date("2024-12-21T16:00:00Z"),
         totalPrice: 10000000,
         totalPassenger: 1,
+        status: "unpaid",
+        bookingCode: "code12",
       },
       {
         userId: 3,
@@ -772,6 +796,8 @@ async function main() {
         bookingDate: new Date("2024-12-22T17:00:00Z"),
         totalPrice: 7500000,
         totalPassenger: 2,
+        status: "unpaid",
+        bookingCode: "code13",
       },
       {
         userId: 4,
@@ -779,6 +805,8 @@ async function main() {
         bookingDate: new Date("2024-12-23T18:00:00Z"),
         totalPrice: 4000000,
         totalPassenger: 1,
+        status: "unpaid",
+        bookingCode: "code14",
       },
       {
         userId: 5,
@@ -786,6 +814,8 @@ async function main() {
         bookingDate: new Date("2024-12-24T19:30:00Z"),
         totalPrice: 3750000,
         totalPassenger: 3,
+        status: "unpaid",
+        bookingCode: "code15",
       },
     ],
   });
