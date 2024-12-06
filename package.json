@@ -11,7 +11,7 @@
   "license": "ISC",
   "description": "\u0000 \u0000",
   "dependencies": {
-    "@prisma/client": "^5.22.0",
+    "@prisma/client": "^6.0.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -21,10 +21,12 @@
     "morgan": "^1.10.0",
     "nodemailer": "^6.9.16",
     "nodemon": "^3.1.7",
-    "prisma": "^5.22.0",
     "swagger-ui-express": "^5.0.1"
   },
   "prisma": {
     "seed": "node seed.js"
+  },
+  "devDependencies": {
+    "prisma": "^6.0.1"
   }
 }
