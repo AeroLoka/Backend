@@ -1,5 +1,11 @@
 const express = require('express');
 const morgan = require('morgan');
+const cors = require('cors');
+const dotenv = require('dotenv');
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
+
 const PORT = 3000;
 
 const app = express();
@@ -10,6 +16,7 @@ const swaggerDocument = require('./swagger.json');
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cors());
 app.use('/', router);
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 

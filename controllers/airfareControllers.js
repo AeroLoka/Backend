@@ -24,7 +24,7 @@ const getAllFlights = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       status: 200,
       message: 'Data retrieved successfully',
       data: flights,
@@ -37,7 +37,7 @@ const getAllFlights = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+    return res.status(500).json({
       status: 500,
       message: 'Internal Server Error',
       data: null,
@@ -49,7 +49,11 @@ const getFlightById = async (req, res) => {
   try {
     const flightId = Number(req.params.id);
     if (isNaN(flightId)) {
-      return res.status(400).json({ error: 'Invalid flight ID' });
+      return res.status(400).json({
+        status: 400,
+        message: 'Invalid flight ID',
+        data: null,
+      });
     }
 
     const flight = await prisma.flight.findUnique({
@@ -63,23 +67,36 @@ const getFlightById = async (req, res) => {
     });
 
     if (!flight) {
-      return res.status(404).json({ error: 'Flight not found' });
+      return res.status(404).json({
+        status: 404,
+        message: 'Flight not found',
+        data: null,
+      });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
+      status: 200,
       message: 'Data retrieved successfully',
       data: flight,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      status: 500,
+      message: 'Internal Server Error',
+      data: null,
+    });
   }
 };
 
 const createFlight = async (req, res) => {
   const { error } = flightSchema.validate(req.body);
   if (error) {
-    return res.status(400).json({ error: error.details[0].message });
+    return res.status(400).json({
+      status: 400,
+      message: error.details[0].message,
+      data: null,
+    });
   }
 
   try {
@@ -99,26 +116,39 @@ const createFlight = async (req, res) => {
       },
     });
 
-    res.status(201).json({
+    return res.status(201).json({
+      status: 201,
       message: 'Resource created successfully',
       data: flight,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({
+      status: 500,
+      message: 'Internal Server Error',
+      data: null,
+    });
   }
 };
 
 const updateFlight = async (req, res) => {
   const { error } = flightSchema.validate(req.body);
   if (error) {
-    return res.status(400).json({ error: error.details[0].message });
+    return res.status(400).json({
+      status: 400,
+      message: error.details[0].message,
+      data: null,
+    });
   }
 
   try {
     const flightId = Number(req.params.id);
     if (isNaN(flightId)) {
-      return res.status(400).json({ error: 'Invalid flight ID' });
+      return res.status(400).json({
+        status: 400,
+        message: 'Invalid flight ID',
+        data: null,
+      });
     }
 
     const flight = await prisma.flight.update({
@@ -139,16 +169,25 @@ const updateFlight = async (req, res) => {
     });
 
     if (!flight) {
-      return res.status(404).json({ error: 'Flight not found' });
+      return res.status(404).json({
+        status: 404,
+        message: 'Flight not found',
+        data: null,
+      });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
+      status: 200,
       message: 'Resource updated successfully',
       data: flight,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({
+      status: 500,
+      message: 'Internal Server Error',
+      data: null,
+    });
   }
 };
 
@@ -156,23 +195,36 @@ const deleteFlight = async (req, res) => {
   try {
     const flightId = Number(req.params.id);
     if (isNaN(flightId)) {
-      return res.status(400).json({ error: 'Invalid flight ID' });
+      return res.status(400).json({
+        status: 400,
+        message: 'Invalid flight ID',
+        data: null,
+      });
     }
 
     const flight = await prisma.flight.delete({
       where: { id: flightId },
     });
 
-    res.status(200).json({
+    return res.status(200).json({
+      status: 200,
       message: 'Resource deleted successfully',
       data: flight,
     });
   } catch (error) {
     console.error(error);
     if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Flight not found' });
+      return res.status(404).json({
+        status: 404,
+        message: 'Flight not found',
+        data: null,
+      });
     }
-    res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({
+      status: 500,
+      message: 'Internal Server Error',
+      data: null,
+    });
   }
 };
 

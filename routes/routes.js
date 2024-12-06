@@ -7,6 +7,16 @@ const {
   updateFlight,
   deleteFlight,
 } = require('../controllers/airfareControllers');
+
+const {
+  login,
+  register,
+  resetPassword,
+  sendEmailForgetPassword,
+  verifyOtp,
+  resendOtp,
+} = require('../controllers/auth-controler');
+
 const routes = require('express').Router();
 
 routes.post('/api/booking', createBooking);
@@ -18,5 +28,12 @@ routes.get('/api/flights/:id', getFlightById);
 routes.post('/api/flights/', createFlight);
 routes.put('/api/flights/:id', updateFlight);
 routes.delete('/api/flights/:id', deleteFlight);
+
+routes.post('/api/register', register);
+routes.post('/api/verify-otp', verifyOtp);
+routes.post('/api/resend-otp', resendOtp);
+routes.post('/api/login', login);
+routes.post('/api/forget-password', sendEmailForgetPassword);
+routes.post('/api/reset-password', resetPassword);
 
 module.exports = routes;
