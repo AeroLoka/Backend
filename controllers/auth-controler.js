@@ -351,4 +351,20 @@ const resetPassword = async (req, res) => {
   }
 };
 
-module.exports = { resetPassword, sendEmailForgetPassword, register, login, verifyOtp, resendOtp };
+const oauthLogin = (req, res) => {
+  const token = jwt.sign(
+    { id: req.user.id, email: req.user.email, name: req.user.name },
+    process.env.JWT_SECRET
+  );
+  res.json({ name: req.user.name, email: req.user.email, token });
+};
+
+module.exports = {
+  resetPassword,
+  sendEmailForgetPassword,
+  register,
+  login,
+  verifyOtp,
+  resendOtp,
+  oauthLogin,
+};
