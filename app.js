@@ -13,6 +13,9 @@ const router = require('./routes/routes');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
 
+const passport = require('./services/passport');
+app.use(passport.initialize());
+
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

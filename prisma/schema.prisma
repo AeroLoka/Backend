@@ -18,6 +18,7 @@ model User {
   name          String
   email         String         @unique
   phoneNumber   String         @unique
+  googleId      String?        @unique
   password      String
   isActive      Boolean        @default(false)
   bookings      Booking[]
