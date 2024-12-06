@@ -294,8 +294,238 @@
           }
         }
       }
+    },
+    "/api/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register user",
+        "description": "Register a new user.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Register"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "User email already exists."
+          },
+          "500": {
+            "description": "Error generating token."
+          }
+        }
+      }
+    },
+    "/api/verify-otp": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Verify OTP",
+        "description": "Verify OTP.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Token"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyOTP"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP verified successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyOTPResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired token."
+          },
+          "404": {
+            "description": "User not found."
+          },
+          "500": {
+            "description": "Error verifying OTP."
+          }
+        }
+      }
+    },
+    "/api/resend-otp": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Resend OTP",
+        "description": "Resend OTP.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendOTP"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP resent successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResendOTPResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired token."
+          },
+          "404": {
+            "description": "User not found."
+          },
+          "500": {
+            "description": "Error resending OTP."
+          }
+        }
+      }
+    },
+    "/api/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login user",
+        "description": "Login a user.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User logged in successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid email or password."
+          },
+          "500": {
+            "description": "Error generating token."
+          }
+        }
+      }
+    },
+    "/api/forget-password": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Forget password",
+        "description": "Forget password.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendEmailForgetPassword"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset link sent successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendEmailForgetPasswordResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid email."
+          },
+          "500": {
+            "description": "Error sending password reset link."
+          }
+        }
+      }
+    },
+    "/api/reset-password": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Reset password",
+        "description": "Reset password.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Token"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPassword"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetPasswordResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired token."
+          },
+          "404": {
+            "description": "User not found."
+          },
+          "500": {
+            "description": "Error resetting password."
+          }
+        }
+      }
     }
   },
+
   "components": {
     "parameters": {
       "Criteria": {
@@ -345,6 +575,15 @@
         "schema": {
           "type": "integer",
           "default": 1
+        }
+      },
+      "Token": {
+        "name": "token",
+        "in": "query",
+        "description": "The Token code.",
+        "required": true,
+        "schema": {
+          "type": "string"
         }
       }
     },
@@ -489,7 +728,7 @@
           }
         }
       ]
-    },
+      },
       "Booking": {
         "type": "object",
         "properties": {
@@ -639,6 +878,143 @@
       },
       "Seat": {
             "type": "string"
+      },
+      "Register": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "otpToken": {
+            "type": "string"
+          }
+        }
+      },
+      "VerifyOTP": {
+        "type": "object",
+        "properties": {
+          "otp": {
+            "type": "string"
+          }
+        }
+      },
+      "VerifyOTPResponse": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "ResendOTP": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "ResendOTPResponse": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "Login": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "SendEmailForgetPassword": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "SendEmailForgetPasswordResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "ResetPassword": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string"
+          },
+          "confirm_password": {
+            "type": "string"
+          }
+        }
+      },
+      "ResetPasswordResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+            }
+          }
+        }
       }
     }
   }
