@@ -4,9 +4,25 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { sendMail } = require('../services/mail');
 const crypto = require('crypto');
+const
+  { validasiRegistrasi,
+    validasiVerifikasiOtp,
+    validasiResendOtp,
+    validasiLogin,
+    validasiLupaPassword,
+    validasiResetPassword
+  } = require('../validations/authValidations');
 
 const register = async (req, res) => {
   try {
+    const { error } = validasiRegistrasi.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        status: '400',
+        message: error.details[0].message,
+        data: null,
+      });
+    }
     const { name, email, phoneNumber, password } = req.body;
 
     const userExist = await prisma.user.findUnique({
@@ -69,6 +85,15 @@ const register = async (req, res) => {
 
 const verifyOtp = async (req, res) => {
   try {
+    const { error } = validasiVerifikasiOtp.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        status: '400',
+        message: error.details[0].message,
+        data: null,
+      });
+    }
+
     const { token } = req.query;
     const { otp } = req.body;
 
@@ -134,6 +159,14 @@ const verifyOtp = async (req, res) => {
 
 const resendOtp = async (req, res) => {
   try {
+    const { error } = validasiResendOtp.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        status: '400',
+        message: error.details[0].message,
+        data: null,
+      });
+    }
     const { email } = req.body;
 
     const user = await prisma.user.findUnique({
@@ -188,6 +221,15 @@ const resendOtp = async (req, res) => {
 
 const login = async (req, res) => {
   try {
+    const { error } = validasiLogin.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        status: '400',
+        message: error.details[0].message,
+        data: null,
+      });
+    }
+
     const { identifier, password } = req.body;
 
     const user = await prisma.user.findFirst({
@@ -231,6 +273,14 @@ const login = async (req, res) => {
 
 const sendEmailForgetPassword = async (req, res) => {
   try {
+    const { error } = validasiLupaPassword.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        status: '400',
+        message: error.details[0].message,
+        data: null,
+      });
+    }
     const { email } = req.body;
 
     const user = await prisma.user.findUnique({
@@ -278,6 +328,15 @@ const sendEmailForgetPassword = async (req, res) => {
 };
 
 const resetPassword = async (req, res) => {
+  const { error } = validasiResetPassword.validate(req.body);
+  if (error) {
+    return res.status(400).json({
+      status: 400,
+      message: error.details[0].message,
+      data: null,
+    });
+  }
+
   const { token } = req.query;
   const { password, confirm_password } = req.body;
 
