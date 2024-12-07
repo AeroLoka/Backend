@@ -24,10 +24,11 @@ const { restrict } = require('../middleware/jwt');
 
 routes.post('/api/booking', restrict, createBooking);
 routes.get('/api/booking/:userId', restrict, getAllBookingsByUserId);
-routes.get('/api/search-flights', getFlights);
 
-routes.get('/api/flights/', restrict, getAllFlights);
-routes.get('/api/flights/:id', restrict, getFlightById);
+routes.get('/api/search-flights', getFlights);
+routes.get('/api/flights/', getAllFlights);
+routes.get('/api/flights/:id', getFlightById);
+
 routes.post('/api/flights/', restrict, createFlight);
 routes.put('/api/flights/:id', restrict, updateFlight);
 routes.delete('/api/flights/:id', restrict, deleteFlight);
