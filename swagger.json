@@ -10,7 +10,7 @@
     "url": "http://localhost:3000",
     "description": "Local development server"
   }
-],
+  ],
   "paths": {
     "/api/flights": {
       "get": {
@@ -267,6 +267,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/Criteria"
+          },
+          {
+            "$ref": "#/components/parameters/Value"
           },
           {
             "$ref": "#/components/parameters/Filter"
@@ -555,6 +558,15 @@
             "kedatangan-paling-awal",
             "kedatangan-paling-akhir"
           ]
+        }
+      },
+      "Value": {
+        "name": "value",
+        "in": "query",
+        "description": "The value to filter the flights.",
+        "required": true,
+        "schema": {
+          "type": "string"
         }
       },
       "Page": {
