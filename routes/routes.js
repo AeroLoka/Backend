@@ -24,7 +24,7 @@ const { restrict } = require('../middleware/jwt');
 
 routes.post('/api/booking', restrict, createBooking);
 routes.get('/api/booking/:userId', restrict, getAllBookingsByUserId);
-routes.get('/api/search-flights', restrict, getFlights);
+routes.get('/api/search-flights', getFlights);
 
 routes.get('/api/flights/', restrict, getAllFlights);
 routes.get('/api/flights/:id', restrict, getFlightById);
