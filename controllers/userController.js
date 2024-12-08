@@ -1,31 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const createUser = async (req, res) => {
-  try {
-    const { name, email, phoneNumber, password } = req.body;
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        phoneNumber,
-        password,
-      },
-    });
-    return res.status(201).json({
-      status: '201',
-      message: 'User created successfully',
-      data: user,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      status: '500',
-      message: 'Error creating user',
-      error: error.message,
-    });
-  }
-};
-
 const getAllUsers = async (req, res) => {
   try {
     const users = await prisma.user.findMany();
@@ -73,14 +48,13 @@ const getUserById = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, phoneNumber, password } = req.body;
+    const { name, email, phoneNumber } = req.body;
     const user = await prisma.user.update({
       where: { id: parseInt(id) },
       data: {
         name,
         email,
         phoneNumber,
-        password,
       },
     });
     return res.status(200).json({
