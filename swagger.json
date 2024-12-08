@@ -5,31 +5,24 @@
     "version": "1.0.0",
     "description": "API documentation for managing flights."
   },
+  "servers": [
+  {
+    "url": "http://localhost:3000",
+    "description": "Local development server"
+  }
+  ],
   "paths": {
-    "/flights": {
+    "/api/flights": {
       "get": {
+        "tags": ["Flights"],
         "summary": "Get all flights",
         "description": "Retrieve a paginated list of flights.",
         "parameters": [
           {
-            "name": "limit",
-            "in": "query",
-            "description": "Number of flights per page.",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 10
-            }
+            "$ref": "#/components/parameters/Page"
           },
           {
-            "name": "page",
-            "in": "query",
-            "description": "Page number.",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 1
-            }
+            "$ref": "#/components/parameters/PageLimit"
           }
         ],
         "responses": {
@@ -52,6 +45,7 @@
         }
       },
       "post": {
+        "tags": ["Flights"],
         "summary": "Create a flight",
         "description": "Add a new flight to the database.",
         "requestBody": {
@@ -70,9 +64,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Flight"
+                      "$ref": "#/components/schemas/Flight"
+                  }
                 }
-              }
             }
           },
           "400": {
@@ -84,8 +78,9 @@
         }
       }
     },
-    "/flights/{id}": {
+    "/api/flights/{id}": {
       "get": {
+        "tags": ["Flights"],
         "summary": "Get flight by ID",
         "description": "Retrieve a single flight by its ID.",
         "parameters": [
@@ -105,7 +100,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Flight"
+                  "$ref": "#/components/schemas/GetFlightResponse"
                 }
               }
             }
@@ -122,6 +117,7 @@
         }
       },
       "put": {
+        "tags": ["Flights"],
         "summary": "Update flight",
         "description": "Update an existing flight.",
         "parameters": [
@@ -168,6 +164,7 @@
         }
       },
       "delete": {
+        "tags": ["Flights"],
         "summary": "Delete flight",
         "description": "Delete a flight by its ID.",
         "parameters": [
@@ -196,10 +193,460 @@
           }
         }
       }
+    },
+    "/api/booking": {
+      "post": {
+        "tags": ["Bookings"],
+        "summary": "Create a booking",
+        "description": "Add a new booking to the database.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Booking"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Booking created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      }
+    },
+    "/api/booking/{userId}": {
+      "get": {
+        "tags": ["Bookings"],
+        "summary": "Get bookings by user ID",
+        "description": "Retrieve a list of bookings for a specific user.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "ID of the user.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBookingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/search-flights": {
+      "get": {
+        "tags": ["Search and Filter Flights"],
+        "summary": "Search for flights",
+        "description": "Retrieve a list of flights based on search criteria.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Criteria"
+          },
+          {
+            "$ref": "#/components/parameters/Value"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Flights retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Flight"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid criteria or filter provided."
+          },
+          "404": {
+            "description": "No flights found matching the criteria or filter."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/api/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register user",
+        "description": "Register a new user.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Register"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "User email already exists."
+          },
+          "500": {
+            "description": "Error generating token."
+          }
+        }
+      }
+    },
+    "/api/verify-otp": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Verify OTP",
+        "description": "Verify OTP.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Token"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyOTP"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP verified successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyOTPResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired token."
+          },
+          "404": {
+            "description": "User not found."
+          },
+          "500": {
+            "description": "Error verifying OTP."
+          }
+        }
+      }
+    },
+    "/api/resend-otp": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Resend OTP",
+        "description": "Resend OTP.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendOTP"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP resent successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResendOTPResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired token."
+          },
+          "404": {
+            "description": "User not found."
+          },
+          "500": {
+            "description": "Error resending OTP."
+          }
+        }
+      }
+    },
+    "/api/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login user",
+        "description": "Login a user.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User logged in successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid email or password."
+          },
+          "500": {
+            "description": "Error generating token."
+          }
+        }
+      }
+    },
+    "/api/forget-password": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Forget password",
+        "description": "Forget password.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendEmailForgetPassword"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset link sent successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendEmailForgetPasswordResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid email."
+          },
+          "500": {
+            "description": "Error sending password reset link."
+          }
+        }
+      }
+    },
+    "/api/reset-password": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Reset password",
+        "description": "Reset password.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Token"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPassword"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetPasswordResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired token."
+          },
+          "404": {
+            "description": "User not found."
+          },
+          "500": {
+            "description": "Error resetting password."
+          }
+        }
+      }
     }
   },
+
   "components": {
+    "parameters": {
+      "Criteria": {
+        "name": "criteria",
+        "in": "query",
+        "description": "The search criterion to filter flights.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": ["benua", "kelas", "kota", "negara"]
+        }
+      },
+      "Filter": {
+        "name": "filter",
+        "in": "query",
+        "description": "The filter to apply to the flights.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "harga-termurah",
+            "harga-termahal",
+            "durasi-terpendek",
+            "durasi-terpanjang",
+            "keberangkatan-paling-awal",
+            "keberangkatan-paling-akhir",
+            "kedatangan-paling-awal",
+            "kedatangan-paling-akhir"
+          ]
+        }
+      },
+      "Value": {
+        "name": "value",
+        "in": "query",
+        "description": "The value to filter the flights.",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "Page": {
+        "name": "limit",
+        "in": "query",
+        "description": "Number of flights per page.",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 10
+        }
+      },
+      "PageLimit":{
+        "name": "page",
+        "in": "query",
+        "description": "Page number.",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 1
+        }
+      },
+      "Token": {
+        "name": "token",
+        "in": "query",
+        "description": "The Token code.",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
     "schemas": {
+      "Airline": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Airport": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "cityId": {
+            "type": "integer"
+          },
+          "terminal": {
+            "type": "string"
+          },
+          "continent": {
+            "type": "string"
+          }
+        }
+      },
+      "OriginCity": {
+        "type": "object",
+        "properties": {
+          "shortname": {
+            "type": "string"
+          },
+          "fullname": {
+            "type": "string"
+          }
+        }
+      },
+      "DestinationCity": {
+        "type": "object",
+        "properties": {
+          "shortname": {
+            "type": "string"
+          },
+          "fullname": {
+            "type": "string"
+          }
+        }
+      },
       "Flight": {
         "type": "object",
         "properties": {
@@ -254,12 +701,6 @@
       "FlightResponse": {
         "type": "object",
         "properties": {
-          "status": {
-            "type": "integer"
-          },
-          "message": {
-            "type": "string"
-          },
           "data": {
             "type": "array",
             "items": {
@@ -281,6 +722,308 @@
               "totalPages": {
                 "type": "integer"
               }
+            }
+          }
+        }
+      },
+      "GetFlightResponse": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/components/schemas/Flight" },
+        {
+          "type": "object",
+          "properties": {
+            "airlines": { "$ref": "#/components/schemas/Airline" },
+            "airport": { "$ref": "#/components/schemas/Airport" },
+            "originCity": { "$ref": "#/components/schemas/OriginCity" },
+            "destinationCity": { "$ref": "#/components/schemas/DestinationCity" }
+          }
+        }
+      ]
+      },
+      "Booking": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "flightId": {
+            "type": "integer"
+          },
+          "totalPrice": {
+            "type": "number",
+            "format": "float"
+          },
+          "passengers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Passenger"
+            }
+          },
+          "seats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Seat"
+            }
+          }
+        },
+        "required": [
+          "email",
+          "flightId",
+          "totalPrice",
+          "passengers",
+          "seats"
+        ]
+      },
+      "BookingsResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "bookingId": {
+            "type": "integer"
+          },
+          "totalPrice": {
+            "type": "number",
+            "format": "float"
+          },
+          "bookingDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalPassenger": {
+            "type": "integer"
+          },
+          "seats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Seat"
+            }
+          },
+          "passengers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Passenger"
+            }
+          }
+        }
+      },
+      "GetBookingsResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "userId": {
+            "type": "integer"
+          },
+          "flightId": {
+            "type": "integer"
+          },
+          "bookingDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalPrice": {
+            "type": "number",
+            "format": "float"
+          },
+          "totalPassenger": {
+            "type": "integer"
+          },
+          "flight": {
+            "$ref": "#/components/schemas/Flight"
+          },
+          "passengers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "bookingId": {
+                  "type": "integer"
+                },
+                "passengersId": {
+                  "type": "integer"
+                },
+                "seatId": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Passenger": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "nationality": {
+            "type": "string"
+          },
+          "passportNumber": {
+            "type": "string"
+          },
+          "passportExpiry": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "Seat": {
+            "type": "string"
+      },
+      "Register": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "otpToken": {
+            "type": "string"
+          }
+        }
+      },
+      "VerifyOTP": {
+        "type": "object",
+        "properties": {
+          "otp": {
+            "type": "string"
+          }
+        }
+      },
+      "VerifyOTPResponse": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "ResendOTP": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "ResendOTPResponse": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "Login": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "SendEmailForgetPassword": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "SendEmailForgetPasswordResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "ResetPassword": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string"
+          },
+          "confirm_password": {
+            "type": "string"
+          }
+        }
+      },
+      "ResetPasswordResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
             }
           }
         }
