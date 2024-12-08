@@ -1,4 +1,6 @@
 const routes = require('express').Router();
+const passport = require('../services/passport');
+const { restrict } = require('../middleware/jwt');
 const { createBooking, getAllBookingsByUserId } = require('../controllers/transaction-controller');
 const { getFlights } = require('../controllers/flightController');
 const {
@@ -17,7 +19,7 @@ const {
   resendOtp,
   oauthLogin,
 } = require('../controllers/auth-controler');
-const passport = require('../services/passport');
+
 const {
   getAllUsers,
   getUserById,
@@ -30,15 +32,16 @@ routes.get('/api/users/:id', getUserById);
 routes.put('/api/users/:id', updateUser);
 routes.delete('/api/users/:id', deleteUser);
 
-routes.post('/api/booking', createBooking);
-routes.get('/api/booking/:userId', getAllBookingsByUserId);
+routes.post('/api/booking', restrict, createBooking);
+routes.get('/api/booking/:userId', restrict, getAllBookingsByUserId);
 
 routes.get('/api/search-flights', getFlights);
 routes.get('/api/flights/', getAllFlights);
 routes.get('/api/flights/:id', getFlightById);
-routes.post('/api/flights/', createFlight);
-routes.put('/api/flights/:id', updateFlight);
-routes.delete('/api/flights/:id', deleteFlight);
+
+routes.post('/api/flights/', restrict, createFlight);
+routes.put('/api/flights/:id', restrict, updateFlight);
+routes.delete('/api/flights/:id', restrict, deleteFlight);
 
 routes.post('/api/register', register);
 routes.post('/api/verify-otp', verifyOtp);

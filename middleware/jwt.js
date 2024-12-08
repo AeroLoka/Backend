@@ -5,8 +5,9 @@ const restrict = async (req, res, next) => {
   if (!authorization || !authorization.startsWith('Bearer ')) {
     return res.status(401).json({
       status: 401,
-      message: 'Unauthorized',
+      message: 'Unauthorized. Please login or register.',
       data: null,
+      redirectTo:'/api/login',
     });
   }
   const token = authorization.split(' ')[1];
@@ -17,8 +18,9 @@ const restrict = async (req, res, next) => {
       console.log(err);
       return res.status(401).json({
         status: 401,
-        message: 'Unauthorized',
+        message: 'Unauthorized. Invalid token, please login again.',
         data: null,
+        redirectTo:'/api/login',
       });
     }
     req.user = decoded;
