@@ -1,6 +1,8 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+const { validasiUpdateUser } = require('../validations/userValidation');
+
 const getAllUsers = async (req, res) => {
   try {
     const users = await prisma.user.findMany();
@@ -46,6 +48,7 @@ const getUserById = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
+  console.log(validasiUpdateUser);
   const { error } = validasiUpdateUser.validate(req.body);
   if (error) {
     return res.status(400).json({
