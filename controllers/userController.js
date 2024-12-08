@@ -46,6 +46,15 @@ const getUserById = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
+  const { error } = validasiUpdateUser.validate(req.body);
+  if (error) {
+    return res.status(400).json({
+      status: '400',
+      message: error.details[0].message,
+      data: null,
+    });
+  }
+
   try {
     const { id } = req.params;
     const { name, email, phoneNumber } = req.body;
@@ -91,4 +100,4 @@ const deleteUser = async (req, res) => {
   }
 };
 
-module.exports = { createUser, getAllUsers, getUserById, updateUser, deleteUser };
+module.exports = { getAllUsers, getUserById, updateUser, deleteUser };

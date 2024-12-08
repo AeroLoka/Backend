@@ -19,7 +19,6 @@ const {
 } = require('../controllers/auth-controler');
 const passport = require('../services/passport');
 const {
-  createUser,
   getAllUsers,
   getUserById,
   updateUser,
@@ -28,7 +27,6 @@ const {
 
 routes.get('/api/users', getAllUsers);
 routes.get('/api/users/:id', getUserById);
-routes.post('/api/users/', createUser);
 routes.put('/api/users/:id', updateUser);
 routes.delete('/api/users/:id', deleteUser);
 
