@@ -86,18 +86,19 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    await prisma.user.delete({
+    await prisma.user.update({
       where: { id: parseInt(id) },
+      data: { isActive: false },
     });
     return res.status(200).json({
       status: '200',
-      message: 'User deleted successfully',
+      message: 'User deactivated successfully',
       data: null,
     });
   } catch (error) {
     return res.status(500).json({
       status: '500',
-      message: 'Error deleting user',
+      message: 'Error deactivating user',
       error: error.message,
     });
   }
