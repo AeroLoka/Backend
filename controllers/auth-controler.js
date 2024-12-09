@@ -194,7 +194,7 @@ const resendOtp = async (req, res) => {
 
     let token;
     try {
-      token = jwt.sign({ email, otp, otpExpiresAt }, process.env.JWT_SECRET, { expiresIn: '1m' });
+      token = jwt.sign({ email, otp, otpExpiresAt }, process.env.JWT_SECRET, { expiresIn: '5m' });
     } catch (err) {
       return res.status(500).json({
         status: '500',
