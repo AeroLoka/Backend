@@ -4,14 +4,14 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { sendMail } = require('../services/mail');
 const crypto = require('crypto');
-const
-  { validasiRegistrasi,
-    validasiVerifikasiOtp,
-    validasiResendOtp,
-    validasiLogin,
-    validasiLupaPassword,
-    validasiResetPassword
-  } = require('../validations/authValidations');
+const {
+  validasiRegistrasi,
+  validasiVerifikasiOtp,
+  validasiResendOtp,
+  validasiLogin,
+  validasiLupaPassword,
+  validasiResetPassword,
+} = require('../validations/authValidations');
 
 const register = async (req, res) => {
   try {
@@ -260,7 +260,7 @@ const login = async (req, res) => {
     return res.status(200).json({
       status: '200',
       message: 'Login successful',
-      data: { email: user.email, name: user.name, token },
+      data: { id: user.id, email: user.email, name: user.name, token },
     });
   } catch (error) {
     return res.status(500).json({
@@ -309,7 +309,7 @@ const sendEmailForgetPassword = async (req, res) => {
     const subject = 'Password Reset';
     const message = `<div>
       <h3>Please click the link below to reset your password</h3>
-      <a href='http://localhost:3000/reset-password'>Reset Password</a>
+      <a href='${process.env.FRONTEND_URL}/reset-password?${token}'>Reset Password</a>
     </div>`;
 
     sendMail(email, subject, message);
