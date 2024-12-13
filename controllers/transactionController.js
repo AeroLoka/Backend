@@ -1,5 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
-const { bookingSchema } = require('../validations/transaction-validation');
+const { bookingSchema } = require('../validations/transactionValidation');
 const { generateUniqueBookingCode } = require('../utils/generateRandomCode');
 const prisma = new PrismaClient();
 
@@ -213,6 +213,7 @@ const getAllBookingsByUserId = async (req, res) => {
       include: {
         flight: true,
         passengers: true,
+        user: true,
       },
     });
 
