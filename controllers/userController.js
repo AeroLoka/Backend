@@ -20,12 +20,21 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-const getUserById = async (req, res) => {
+const getUserByEmail = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { email } = req.query;
+    if (!email) {
+      return res.status(400).json({
+        status: '400',
+        message: 'Email query parameter is required',
+        data: null,
+      });
+    }
+
     const user = await prisma.user.findUnique({
-      where: { id: parseInt(id) },
+      where: { email: email },
     });
+
     if (!user) {
       return res.status(404).json({
         status: '404',
@@ -33,6 +42,7 @@ const getUserById = async (req, res) => {
         data: null,
       });
     }
+
     return res.status(200).json({
       status: '200',
       message: 'User retrieved successfully',
@@ -48,7 +58,6 @@ const getUserById = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  console.log(validasiUpdateUser);
   const { error } = validasiUpdateUser.validate(req.body);
   if (error) {
     return res.status(400).json({
@@ -59,13 +68,20 @@ const updateUser = async (req, res) => {
   }
 
   try {
-    const { id } = req.params;
-    const { name, email, phoneNumber } = req.body;
+    const { email } = req.query;
+    if (!email) {
+      return res.status(400).json({
+        status: '400',
+        message: 'Email query parameter is required',
+        data: null,
+      });
+    }
+
+    const { name, phoneNumber } = req.body;
     const user = await prisma.user.update({
-      where: { id: parseInt(id) },
+      where: { email: email },
       data: {
         name,
-        email,
         phoneNumber,
       },
     });
@@ -85,9 +101,17 @@ const updateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { email } = req.query;
+    if (!email) {
+      return res.status(400).json({
+        status: '400',
+        message: 'Email query parameter is required',
+        data: null,
+      });
+    }
+
     await prisma.user.update({
-      where: { id: parseInt(id) },
+      where: { email: email },
       data: { isActive: false },
     });
     return res.status(200).json({
@@ -104,4 +128,4 @@ const deleteUser = async (req, res) => {
   }
 };
 
-module.exports = { getAllUsers, getUserById, updateUser, deleteUser };
+module.exports = { getAllUsers, getUserByEmail, updateUser, deleteUser };
