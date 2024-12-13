@@ -68,8 +68,8 @@ const updateUser = async (req, res) => {
   }
 
   try {
-    const { email } = req.query;
-    if (!email) {
+    const { email: originalEmail } = req.query;
+    if (!originalEmail) {
       return res.status(400).json({
         status: '400',
         message: 'Email query parameter is required',
@@ -77,11 +77,12 @@ const updateUser = async (req, res) => {
       });
     }
 
-    const { name, phoneNumber } = req.body;
+    const { name, email, phoneNumber } = req.body;
     const user = await prisma.user.update({
-      where: { email: email },
+      where: { email: originalEmail },
       data: {
         name,
+        email,
         phoneNumber,
       },
     });
