@@ -1,6 +1,6 @@
-const { PrismaClient } = require('@prisma/client');
-const { bookingSchema } = require('../validations/transaction-validation');
-const { generateUniqueBookingCode } = require('../utils/generateRandomCode');
+const { PrismaClient } = require("@prisma/client");
+const { bookingSchema } = require("../validations/transaction-validation");
+const { generateUniqueBookingCode } = require("../utils/generateRandomCode");
 const prisma = new PrismaClient();
 
 const createBooking = async (req, res) => {
@@ -22,7 +22,7 @@ const createBooking = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         status: 404,
-        message: 'User not found',
+        message: "User not found",
         data: null,
       });
     }
@@ -33,7 +33,7 @@ const createBooking = async (req, res) => {
     if (!flight) {
       return res.status(404).json({
         status: 404,
-        message: 'Flight not found',
+        message: "Flight not found",
         data: null,
       });
     }
@@ -43,7 +43,7 @@ const createBooking = async (req, res) => {
         where: {
           flightId,
           seatNumber,
-          status: 'available',
+          status: "available",
         },
       });
 
@@ -52,7 +52,7 @@ const createBooking = async (req, res) => {
           data: {
             flightId,
             seatNumber,
-            status: 'available',
+            status: "available",
           },
         });
       }
@@ -69,7 +69,7 @@ const createBooking = async (req, res) => {
         totalPrice,
         bookingDate: new Date(),
         totalPassenger: passengers.length,
-        status: 'unpaid',
+        status: "unpaid",
         bookingCode: bookingCode,
       },
     });
@@ -89,21 +89,22 @@ const createBooking = async (req, res) => {
 
     const createdPassengers = await Promise.all(passengerPromises);
 
-    const bookingPassengerPromises = createdPassengers.map(async (createdPassenger, index) =>
-      prisma.bookingPassenger.create({
-        data: {
-          bookingId: booking.id,
-          passengerId: createdPassenger.id,
-          seatId: await prisma.seat
-            .findFirst({
-              where: {
-                flightId,
-                seatNumber: seats[index],
-              },
-            })
-            .then((seat) => seat.id),
-        },
-      })
+    const bookingPassengerPromises = createdPassengers.map(
+      async (createdPassenger, index) =>
+        prisma.bookingPassenger.create({
+          data: {
+            bookingId: booking.id,
+            passengerId: createdPassenger.id,
+            seatId: await prisma.seat
+              .findFirst({
+                where: {
+                  flightId,
+                  seatNumber: seats[index],
+                },
+              })
+              .then((seat) => seat.id),
+          },
+        })
     );
 
     await Promise.all(bookingPassengerPromises);
@@ -113,26 +114,77 @@ const createBooking = async (req, res) => {
         flightId,
         seatNumber: { in: seats },
       },
-      data: { status: 'booked' },
+      data: { status: "booked" },
     });
 
-    res.status(201).json({
-      status: 201,
-      message: 'Booking created successfully',
-      data: {
-        name: user.name,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        bookingId: booking.id,
-        totalPrice,
-        bookingStatus: booking.status,
-        bookingCode,
-        bookingDate: new Date(),
-        totalPassenger: passengers.length,
-        seats,
-        passengers: createdPassengers,
-      },
+    // Integrasi pembayaran menggunakan Midtrans
+    const midtransClient = require("midtrans-client");
+    require("dotenv").config();
+
+    const snap = new midtransClient.Snap({
+      isProduction: false, // Ganti ke `true` untuk produksi
+      serverKey: process.env.MIDTRANS_SERVER_KEY,
+      clientKey: process.env.MIDTRANS_CLIENT_KEY,
     });
+
+    const parameter = {
+      transaction_details: {
+        order_id: bookingCode, // Gunakan kode pemesanan sebagai order_id
+        gross_amount: totalPrice, // Total harga
+      },
+      customer_details: {
+        first_name: user.name,
+        email: user.email,
+      },
+    };
+
+    try {
+      const token = await snap.createTransaction(parameter);
+
+      // Ambil hanya token ID dari response Midtrans
+      const { token: transactionToken } = token;
+
+      res.status(201).json({
+        status: 201,
+        message: "Booking created successfully",
+        isSucces: true,
+        // hanya mengirim token ID
+        data: {
+          name: user.name,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+          bookingId: booking.id,
+          totalPrice,
+          bookingStatus: booking.status,
+          bookingCode,
+          bookingDate: new Date(),
+          totalPassenger: passengers.length,
+          seats,
+          passengers: createdPassengers,
+        },
+        token: transactionToken,
+      });
+    } catch (paymentError) {
+      console.error(paymentError);
+      res.status(500).json({
+        status: 500,
+        message: "Booking created but failed to generate payment URL",
+        data: {
+          name: user.name,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+          bookingId: booking.id,
+          totalPrice,
+          bookingStatus: booking.status,
+          bookingCode,
+          bookingDate: new Date(),
+          totalPassenger: passengers.length,
+          seats,
+          passengers: createdPassengers,
+        },
+        paymentError: paymentError.message,
+      });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -142,6 +194,8 @@ const createBooking = async (req, res) => {
     });
   }
 };
+
+module.exports = createBooking;
 
 const getAllBookingsByUserId = async (req, res) => {
   const { userId } = req.params;
@@ -182,7 +236,7 @@ const getAllBookingsByUserId = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         status: 404,
-        message: 'User not found',
+        message: "User not found",
         data: null,
       });
     }
@@ -219,21 +273,21 @@ const getAllBookingsByUserId = async (req, res) => {
     if (bookings.length === 0) {
       return res.status(404).json({
         status: 404,
-        message: 'No bookings found for this user',
+        message: "No bookings found for this user",
         data: null,
       });
     }
 
     return res.status(200).json({
       status: 200,
-      message: 'Bookings retrieved successfully',
+      message: "Bookings retrieved successfully",
       data: bookings,
     });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       status: 500,
-      message: 'Internal Server Error',
+      message: "Internal Server Error",
       data: null,
     });
   }
