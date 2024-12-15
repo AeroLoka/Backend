@@ -1,7 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const flightSchema = require('../validations/flight-validations');
+const flightSchema = require('../validations/flightValidations');
 
 const getAllFlights = async (req, res) => {
   const { limit = 10, page = 1 } = req.query;
@@ -12,6 +12,12 @@ const getAllFlights = async (req, res) => {
     const flights = await prisma.flight.findMany({
       skip,
       take,
+      include: {
+        airlines: true,
+        airport: true,
+        originCity: true,
+        destinationCity: true,
+      },
     });
 
     const totalFlights = await prisma.flight.count();

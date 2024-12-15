@@ -1,5 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
-const { bookingSchema } = require("../validations/transaction-validation");
+const { bookingSchema } = require("../validations/transactionValidation");
 const { generateUniqueBookingCode } = require("../utils/generateRandomCode");
 const prisma = new PrismaClient();
 
@@ -129,8 +129,8 @@ const createBooking = async (req, res) => {
 
     const parameter = {
       transaction_details: {
-        order_id: bookingCode, // Gunakan kode pemesanan sebagai order_id
-        gross_amount: totalPrice, // Total harga
+        order_id: bookingCode,
+        gross_amount: totalPrice,
       },
       customer_details: {
         first_name: user.name,
@@ -141,14 +141,12 @@ const createBooking = async (req, res) => {
     try {
       const token = await snap.createTransaction(parameter);
 
-      // Ambil hanya token ID dari response Midtrans
       const { token: transactionToken } = token;
 
       res.status(201).json({
         status: 201,
         message: "Booking created successfully",
         isSucces: true,
-        // hanya mengirim token ID
         data: {
           name: user.name,
           email: user.email,
@@ -267,6 +265,7 @@ const getAllBookingsByUserId = async (req, res) => {
       include: {
         flight: true,
         passengers: true,
+        user: true,
       },
     });
 
