@@ -1,7 +1,7 @@
 const routes = require('express').Router();
 const passport = require('../services/passport');
 const { restrict } = require('../middleware/jwt');
-const { createBooking, getAllBookingsByUserId } = require('../controllers/transactionController');
+const { createBooking, getAllBookingsByUserId, handlePaymentNotification } = require('../controllers/transactionController');
 const { getFlights } = require('../controllers/flightController');
 const {
   getAllFlights,
@@ -34,6 +34,7 @@ routes.delete('/api/users', deleteUser);
 
 routes.post('/api/booking', restrict, createBooking);
 routes.get('/api/booking/:userId', restrict, getAllBookingsByUserId);
+routes.post('/api/booking/notification', handlePaymentNotification);
 
 routes.get('/api/search-flights', getFlights);
 routes.get('/api/flights/', getAllFlights);
