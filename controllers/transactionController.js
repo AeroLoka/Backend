@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const { bookingSchema } = require('../validations/transactionValidation');
 const { generateUniqueBookingCode } = require('../utils/generateRandomCode');
 const prisma = new PrismaClient();
-const midtransClient = require('midtrans-client');
+// const midtransClient = require('midtrans-client');
 
 const createBooking = async (req, res) => {
   const { email, flightId, totalPrice, passengers, seats } = req.body;
