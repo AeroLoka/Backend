@@ -5,6 +5,7 @@
     "version": "100",
     "description": "API documentation for managing flights"
   },
+
   "servers": [
   {
     "url": "http://localhost:3000",
@@ -15,6 +16,7 @@
     "description": "Production server"
   }
   ],
+
   "paths": {
     "/api/flights": {
       "get": {
@@ -132,6 +134,7 @@
         }
       }
     },
+
     "/api/flights/{id}": {
       "get": {
         "tags": ["Flights"],
@@ -363,6 +366,7 @@
         }
       }
     },
+
     "/api/booking": {
       "post": {
         "tags": ["Bookings"],
@@ -400,7 +404,7 @@
               "application/json": {
                 "example": {
                   "status": 400,
-                  "message": "Invalid request body",
+                  "message": "Error message",
                   "data": null
                 }
               }
@@ -457,6 +461,7 @@
         }
       }
     },
+
     "/api/booking/{userId}": {
       "get": {
         "tags": ["Bookings"],
@@ -573,6 +578,7 @@
         }
       }
     },
+
     "/api/search-flights": {
       "get": {
         "tags": ["Search and Filter Flights"],
@@ -650,6 +656,7 @@
         }
       }
     },
+
     "/api/register": {
       "post": {
         "tags": ["Auth"],
@@ -714,6 +721,7 @@
         }
       }
     },
+
     "/api/verify-otp": {
       "post": {
         "tags": ["Auth"],
@@ -811,6 +819,7 @@
         }
       }
     },
+
     "/api/resend-otp": {
       "post": {
         "tags": ["Auth"],
@@ -902,6 +911,7 @@
         }
       }
     },
+
     "/api/login": {
       "post": {
         "tags": ["Auth"],
@@ -956,10 +966,23 @@
             "description": "User not found",
             "content": {
               "application/json": {
-                "example": {
-                  "status": 404,
-                  "message": "User not found",
-                  "data": null
+                "examples": {
+                  "Invalid credentials": {
+                    "summary": "Invalid credentials",
+                    "value": {
+                      "status": 404,
+                      "message": "invalid credentials",
+                      "data": null
+                    }
+                  },
+                  "User not found": {
+                    "summary": "User not found",
+                    "value": {
+                      "status": 404,
+                      "message": "User not found",
+                      "data": null
+                    }
+                  }
                 }
               }
             }
@@ -977,6 +1000,7 @@
         }
       }
     },
+
     "/api/forget-password": {
       "post": {
         "tags": ["Auth"],
@@ -1040,6 +1064,7 @@
         }
       }
     },
+
     "/api/reset-password": {
       "post": {
         "tags": ["Auth"],
@@ -1133,6 +1158,7 @@
         }
       }
     },
+
     "/api/users": {
       "get": {
         "tags": ["User"],
@@ -1279,7 +1305,7 @@
         }
       }
     },
-    
+
     "/api/users/email": {
       "get": {
         "tags": ["User"],
@@ -1348,6 +1374,7 @@
         "bearerFormat": "JWT"
       }
     },
+
     "parameters": {
       "Criteria": {
         "name": "criteria",
@@ -1435,6 +1462,7 @@
         }
       }
     },
+
     "schemas": {
       "User": {
         "type": "object",
@@ -1562,17 +1590,7 @@
           "duration": {
             "type": "string"
           }
-        },
-        "required": [
-          "airlinesId",
-          "airportId",
-          "originCityId",
-          "destinationCityId",
-          "departure",
-          "price",
-          "capacity",
-          "class"
-        ]
+        }
       },
       "FlightResponse": {
         "type": "object",
@@ -1688,6 +1706,12 @@
             "items": {
               "$ref": "#/components/schemas/Passenger"
             }
+          },
+          "token": {
+            "type": "string"
+          },
+          "redirect_url": {
+            "type": "string"
           }
         }
       },
@@ -1734,6 +1758,32 @@
                 "seatId": {
                   "type": "integer"
                 }
+              }
+            }
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phoneNumber": {
+                "type": "string"
+              },
+              "googleId": {
+                "type": "string"
+              },
+              "password": {
+                "type": "string"
+              },
+              "isActive": {
+                "type": "boolean"
               }
             }
           }
