@@ -17,7 +17,7 @@ model User {
   id            Int            @id @default(autoincrement())
   name          String
   email         String         @unique
-  phoneNumber   String         @unique
+  phoneNumber   String         
   googleId      String?        @unique
   password      String
   isActive      Boolean        @default(false)
@@ -99,6 +99,7 @@ model Seat {
   flightId   Int
   status     SeatStatus @default(available)
   seatNumber String
+  version    Int        @default(1)
 
   flight           Flight             @relation(fields: [flightId], references: [id])
   BookingPassenger BookingPassenger[]

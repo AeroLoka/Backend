@@ -2,10 +2,10 @@ const { PrismaClient } = require('@prisma/client');
 const { bookingSchema } = require('../validations/transactionValidation');
 const { generateUniqueBookingCode } = require('../utils/generateRandomCode');
 const prisma = new PrismaClient();
+const midtransClient = require('midtrans-client');
 
 const createBooking = async (req, res) => {
   const { email, flightId, totalPrice, passengers, seats } = req.body;
-
   const { error } = bookingSchema.validate(req.body);
   if (error) {
     return res.status(400).json({
@@ -16,128 +16,176 @@ const createBooking = async (req, res) => {
   }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
-    if (!user) {
-      return res.status(404).json({
-        status: 404,
-        message: 'User not found',
-        data: null,
-      });
-    }
-
-    const flight = await prisma.flight.findUnique({
-      where: { id: flightId },
-    });
-    if (!flight) {
-      return res.status(404).json({
-        status: 404,
-        message: 'Flight not found',
-        data: null,
-      });
-    }
-
-    const seatPromises = seats.map(async (seatNumber) => {
-      const seat = await prisma.seat.findFirst({
+    const result = await prisma.$transaction(async (prisma) => {
+      let currentSeats = await prisma.seat.findMany({
         where: {
           flightId,
-          seatNumber,
-          status: 'available',
+          seatNumber: { in: seats },
         },
       });
 
-      if (!seat) {
-        await prisma.seat.create({
-          data: {
+      const existingSeatNumbers = currentSeats.map((seat) => seat.seatNumber);
+      const missingSeats = seats.filter((seatNum) => !existingSeatNumbers.includes(seatNum));
+
+      if (missingSeats.length > 0) {
+        await Promise.all(
+          missingSeats.map((seatNumber) =>
+            prisma.seat.create({
+              data: {
+                flightId,
+                seatNumber,
+                status: 'available',
+                version: 1,
+              },
+            })
+          )
+        );
+
+        currentSeats = await prisma.seat.findMany({
+          where: {
             flightId,
-            seatNumber,
-            status: 'available',
+            seatNumber: { in: seats },
           },
         });
       }
-    });
 
-    await Promise.all(seatPromises);
+      const bookedSeats = currentSeats.filter((seat) => seat.status === 'booked');
+      if (bookedSeats.length > 0) {
+        return {
+          status: 400,
+          error: `Seats ${bookedSeats.map((s) => s.seatNumber).join(', ')} are already booked`,
+        };
+      }
 
-    const bookingCode = await generateUniqueBookingCode(prisma);
+      const user = await prisma.user.findUnique({
+        where: { email },
+      });
 
-    const booking = await prisma.booking.create({
-      data: {
-        userId: user.id,
-        flightId,
-        totalPrice,
-        bookingDate: new Date(),
-        totalPassenger: passengers.length,
-        status: 'unpaid',
-        bookingCode: bookingCode,
-      },
-    });
+      if (!user) {
+        return { status: 404, error: 'User not found' };
+      }
 
-    const passengerPromises = passengers.map((passenger) =>
-      prisma.passenger.create({
+      const bookingCode = await generateUniqueBookingCode(prisma);
+      const booking = await prisma.booking.create({
         data: {
-          firstName: passenger.firstName,
-          lastName: passenger.lastName,
-          birthDate: new Date(passenger.birthDate),
-          nationality: passenger.nationality,
-          passportNumber: passenger.passportNumber,
-          passportExpiry: new Date(passenger.passportExpiry),
+          userId: user.id,
+          flightId,
+          totalPrice,
+          bookingDate: new Date(),
+          totalPassenger: passengers.length,
+          status: 'unpaid',
+          bookingCode,
         },
-      })
-    );
+      });
 
-    const createdPassengers = await Promise.all(passengerPromises);
+      const createdPassengers = await Promise.all(
+        passengers.map((passenger) =>
+          prisma.passenger.create({
+            data: {
+              firstName: passenger.firstName,
+              lastName: passenger.lastName,
+              birthDate: new Date(passenger.birthDate),
+              nationality: passenger.nationality,
+              passportNumber: passenger.passportNumber,
+              passportExpiry: new Date(passenger.passportExpiry),
+            },
+          })
+        )
+      );
 
-    const bookingPassengerPromises = createdPassengers.map(async (createdPassenger, index) =>
-      prisma.bookingPassenger.create({
-        data: {
-          bookingId: booking.id,
-          passengerId: createdPassenger.id,
-          seatId: await prisma.seat
-            .findFirst({
+      const updatedSeatsAndBookings = await Promise.all(
+        currentSeats.map(async (seat, index) => {
+          try {
+            const updatedSeat = await prisma.seat.update({
               where: {
-                flightId,
-                seatNumber: seats[index],
+                id: seat.id,
+                version: seat.version,
+                status: 'available',
               },
-            })
-            .then((seat) => seat.id),
-        },
-      })
-    );
+              data: {
+                version: {
+                  increment: 1,
+                },
+              },
+            });
 
-    await Promise.all(bookingPassengerPromises);
+            await prisma.bookingPassenger.create({
+              data: {
+                bookingId: booking.id,
+                passengerId: createdPassengers[index].id,
+                seatId: updatedSeat.id,
+              },
+            });
 
-    await prisma.seat.updateMany({
-      where: {
-        flightId,
-        seatNumber: { in: seats },
-      },
-      data: { status: 'booked' },
+            return updatedSeat;
+          } catch (error) {
+            if (error.code === 'P2025') {
+              throw new Error(`Seat ${seat.seatNumber} was modified by another transaction`);
+            }
+            throw error;
+          }
+        })
+      );
+
+      return {
+        booking,
+        user,
+        passengers: createdPassengers,
+        seats: updatedSeatsAndBookings,
+      };
     });
 
-    res.status(201).json({
+    if (result.error) {
+      return res.status(result.status).json({
+        status: result.status,
+        message: result.error,
+        data: null,
+      });
+    }
+
+    const snap = new midtransClient.Snap({
+      isProduction: false,
+      serverKey: process.env.MIDTRANS_SERVER_KEY,
+      clientKey: process.env.MIDTRANS_CLIENT_KEY,
+    });
+
+    const parameter = {
+      transaction_details: {
+        order_id: result.booking.bookingCode,
+        gross_amount: totalPrice,
+      },
+      customer_details: {
+        first_name: result.user.name,
+        email: result.user.email,
+      },
+    };
+
+    const token = await snap.createTransaction(parameter);
+
+    return res.status(201).json({
       status: 201,
       message: 'Booking created successfully',
       data: {
-        name: user.name,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        bookingId: booking.id,
+        name: result.user.name,
+        email: result.user.email,
+        phoneNumber: result.user.phoneNumber,
+        bookingId: result.booking.id,
         totalPrice,
-        bookingStatus: booking.status,
-        bookingCode,
-        bookingDate: new Date(),
+        bookingStatus: result.booking.status,
+        bookingCode: result.booking.bookingCode,
+        bookingDate: result.booking.bookingDate,
         totalPassenger: passengers.length,
-        seats,
-        passengers: createdPassengers,
+        seats: result.seats.map((s) => s.seatNumber),
+        passengers: result.passengers,
       },
+      token: token.token,
+      redirect_url: token.redirect_url,
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
+    console.error(error);
+    return res.status(500).json({
       status: 500,
-      message: error.message,
+      message: error.message || 'Internal server error',
       data: null,
     });
   }
@@ -240,4 +288,72 @@ const getAllBookingsByUserId = async (req, res) => {
   }
 };
 
-module.exports = { createBooking, getAllBookingsByUserId };
+const handlePaymentNotification = async (req, res) => {
+  try {
+    const notification = new midtransClient.Snap({
+      isProduction: false,
+      serverKey: process.env.MIDTRANS_SERVER_KEY,
+      clientKey: process.env.MIDTRANS_CLIENT_KEY,
+    });
+
+    const statusResponse = await notification.transaction.notification(req.body);
+    const orderId = statusResponse.order_id;
+    const transactionStatus = statusResponse.transaction_status;
+    const fraudStatus = statusResponse.fraud_status;
+
+    if (transactionStatus === 'capture') {
+      if (fraudStatus === 'accept') {
+        await prisma.booking.update({
+          where: { bookingCode: orderId },
+          data: { status: 'paid' },
+        });
+      }
+    } else if (transactionStatus === 'settlement') {
+      await prisma.booking.update({
+        where: { bookingCode: orderId },
+        data: { status: 'paid' },
+      });
+      const booking = await prisma.booking.update({
+        where: {
+          bookingCode: orderId,
+        },
+        data: { status: 'paid' },
+        include: {
+          passengers: {
+            include: {
+              seat,
+            },
+          },
+        },
+      });
+      await Promise.all(
+        booking.passengers.map((passenger) => {
+          prisma.seat.update({
+            where: { id: passenger.seatId },
+            data: { status: 'booked' },
+          });
+        })
+      );
+    } else if (
+      transactionStatus === 'cancel' ||
+      transactionStatus === 'deny' ||
+      transactionStatus === 'expire'
+    ) {
+      await prisma.booking.update({
+        where: { bookingCode: orderId },
+        data: { status: 'cancelled' },
+      });
+    }
+
+    return res.status(200).json({ status: 200, message: 'OK' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: 500,
+      message: 'Error processing payment notification',
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { createBooking, getAllBookingsByUserId, handlePaymentNotification };
