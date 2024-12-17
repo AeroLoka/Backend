@@ -34,8 +34,8 @@ const bookingSchema = Joi.object({
           'any.required': 'Kewarganegaraan diperlukan',
         }),
         passportNumber: Joi.string().allow('').optional(),
+        passportCountry: Joi.string().allow('').optional(),
         passportExpiry: Joi.date().greater('now').optional().messages({
-          'date.base': 'Tanggal kedaluwarsa paspor harus berupa tanggal yang valid',
           'date.greater': 'Tanggal kedaluwarsa paspor harus lebih besar dari tanggal saat ini',
         }),
         ktpNumber: Joi.string().allow('').optional(),
