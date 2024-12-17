@@ -3,38 +3,64 @@ const prisma = new PrismaClient();
 
 const searchFlight = async (params, includePassengers = true) => {
     const {
-        kotaAsal,
-        kotaTujuan,
-        tanggalKeberangkatan,
-        tanggalKedatangan,
-        penumpangDewasa,
-        penumpangAnak,
-        penumpangBayi,
-        tipeKelas,
+        from,
+        to,
+        departureDateStart,
+        departureDateEnd,
+        returnDateStart,
+        returnDateEnd,
+        adultPassengers,
+        childPassengers,
+        infantPassengers,
+        seatClass,
     } = params;
 
-    const totalPenumpang = parseInt(penumpangDewasa || 0) + parseInt(penumpangAnak || 0) + parseInt(penumpangBayi || 0);
+    const totalPassengers = parseInt(adultPassengers || 0) + parseInt(childPassengers || 0) + parseInt(infantPassengers || 0);
 
     const where = {};
 
-    if (kotaAsal) {
-        where.originCity = { fullname: kotaAsal };
+    if (from) {
+        where.originCity = { fullname: from };
     }
 
-    if (kotaTujuan) {
-        where.destinationCity = { fullname: kotaTujuan };
+    if (to) {
+        where.destinationCity = { fullname: to };
     }
 
-    if (tanggalKeberangkatan) {
-        where.departure = { gte: new Date(tanggalKeberangkatan) };
+    if (departureDateStart) {
+        const depStart = new Date(departureDateStart);
+        if (isNaN(depStart)) {
+            throw new Error('Tanggal keberangkatan tidak valid.');
+        }
+        where.departure = { gte: depStart };
     }
 
-    if (tanggalKedatangan) {
-        where.return = { gte: new Date(tanggalKedatangan) };
+    if (departureDateEnd) {
+        const depEnd = new Date(departureDateEnd);
+        if (isNaN(depEnd)) {
+            throw new Error('Tanggal keberangkatan tidak valid.');
+        }
+        where.departure = { lte: depEnd };
     }
 
-    if (tipeKelas) {
-        where.class = tipeKelas;
+    if (returnDateStart) {
+        const returnStart = new Date(returnDateStart);
+        if (isNaN(returnStart)) {
+            throw new Error('Tanggal kedatangan tidak valid.');
+        }
+        where.return = { gte: returnStart };
+    }
+
+    if (returnDateEnd) {
+        const returnEnd = new Date(returnDateEnd);
+        if (isNaN(returnEnd)) {
+            throw new Error('Tanggal kedatangan tidak valid.');
+        }
+        where.return = { lte: returnEnd };
+    }
+
+    if (seatClass) {
+        where.class = seatClass;
     }
 
     try {
@@ -49,16 +75,12 @@ const searchFlight = async (params, includePassengers = true) => {
             },
         });
 
-        if (includePassengers) {
-            const validFlights = flights.filter(flight => {
-                const validBooking = flight.bookings.some(booking => booking.totalPassenger === totalPenumpang);
-                return validBooking;
-            });
+        const validFlights = flights.filter(flight => {
+            const hasMatchingBooking = flight.bookings.some(booking => booking.totalPassenger === totalPassengers);
+            return hasMatchingBooking;
+        });
 
-            return validFlights;
-        }
-
-        return flights;
+        return validFlights;
     } catch (error) {
         console.error(error);
         return [];
