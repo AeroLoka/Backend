@@ -5,6 +5,7 @@ const {
   createBooking,
   getAllBookingsByUserId,
   handlePaymentNotification,
+  getBookingByBookingCode,
 } = require('../controllers/transactionController');
 const { getFlights } = require('../controllers/flightController');
 const {
@@ -39,6 +40,7 @@ routes.put('/api/users', updateUser);
 routes.delete('/api/users', deleteUser);
 
 routes.post('/api/booking', restrict, createBooking);
+routes.get('/api/booking', restrict, getBookingByBookingCode);
 routes.get('/api/booking/:userId', restrict, getAllBookingsByUserId);
 routes.post('/api/booking/notification', handlePaymentNotification);
 
