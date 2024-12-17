@@ -8,158 +8,142 @@ const createBooking = async (req, res) => {
   const { email, flightId, totalPrice, passengers, seats } = req.body;
   const { error } = bookingSchema.validate(req.body);
   if (error) {
-    return res.status(400).json({
-      status: 400,
-      message: error.details[0].message,
-      data: null,
-    });
+    return res.status(400).json({ status: 400, message: error.details[0].message, data: null });
   }
 
   try {
-    const result = await prisma.$transaction(async (prisma) => {
-      let currentSeats = await prisma.seat.findMany({
-        where: {
-          flightId,
-          seatNumber: { in: seats },
-        },
-      });
+    let currentSeats = await prisma.seat.findMany({
+      where: { flightId, seatNumber: { in: seats } },
+    });
 
-      const existingSeatNumbers = currentSeats.map((seat) => seat.seatNumber);
-      const missingSeats = seats.filter((seatNum) => !existingSeatNumbers.includes(seatNum));
+    const existingSeatNumbers = currentSeats.map((seat) => seat.seatNumber);
+    const missingSeats = seats.filter((seatNum) => !existingSeatNumbers.includes(seatNum));
 
-      if (missingSeats.length > 0) {
-        await Promise.all(
-          missingSeats.map((seatNumber) =>
-            prisma.seat.create({
-              data: {
-                flightId,
-                seatNumber,
-                status: 'available',
-                version: 1,
-              },
-            })
-          )
-        );
-
-        currentSeats = await prisma.seat.findMany({
-          where: {
-            flightId,
-            seatNumber: { in: seats },
-          },
-        });
-      }
-
-      const bookedSeats = currentSeats.filter((seat) => seat.status === 'booked');
-      if (bookedSeats.length > 0) {
-        return {
-          status: 400,
-          error: `Seats ${bookedSeats.map((s) => s.seatNumber).join(', ')} are already booked`,
-        };
-      }
-
-      const user = await prisma.user.findUnique({
-        where: { email },
-      });
-
-      if (!user) {
-        return { status: 404, error: 'User not found' };
-      }
-
-      const bookingCode = await generateUniqueBookingCode(prisma);
-      const booking = await prisma.booking.create({
-        data: {
-          userId: user.id,
-          flightId,
-          totalPrice,
-          bookingDate: new Date(),
-          totalPassenger: passengers.length,
-          status: 'unpaid',
-          bookingCode,
-        },
-      });
-
-      const createdPassengers = await Promise.all(
-        passengers.map((passenger) =>
-          prisma.passenger.create({
-            data: {
-              firstName: passenger.firstName,
-              lastName: passenger.lastName,
-              birthDate: new Date(passenger.birthDate),
-              nationality: passenger.nationality,
-              passportNumber: passenger.passportNumber,
-              passportExpiry: new Date(passenger.passportExpiry),
-            },
+    if (missingSeats.length > 0) {
+      const newSeats = await Promise.all(
+        missingSeats.map((seatNumber) =>
+          prisma.seat.create({
+            data: { flightId, seatNumber, status: 'available' },
           })
         )
       );
+      currentSeats = [...currentSeats, ...newSeats];
+    }
 
-      const updatedSeatsAndBookings = await Promise.all(
-        currentSeats.map(async (seat, index) => {
-          try {
-            const updatedSeat = await prisma.seat.update({
-              where: {
-                id: seat.id,
-                version: seat.version,
-                status: 'available',
-              },
-              data: {
-                version: {
-                  increment: 1,
-                },
-              },
-            });
-
-            await prisma.bookingPassenger.create({
-              data: {
-                bookingId: booking.id,
-                passengerId: createdPassengers[index].id,
-                seatId: updatedSeat.id,
-              },
-            });
-
-            return updatedSeat;
-          } catch (error) {
-            if (error.code === 'P2025') {
-              throw new Error(`Seat ${seat.seatNumber} was modified by another transaction`);
-            }
-            throw error;
-          }
-        })
-      );
-
-      return {
-        booking,
-        user,
-        passengers: createdPassengers,
-        seats: updatedSeatsAndBookings,
-      };
-    });
-
-    if (result.error) {
-      return res.status(result.status).json({
-        status: result.status,
-        message: result.error,
+    const bookedSeats = currentSeats.filter((seat) => seat.status === 'booked');
+    if (bookedSeats.length > 0) {
+      return res.status(400).json({
+        status: 400,
+        message: `Seats ${bookedSeats.map((s) => s.seatNumber).join(', ')} are already booked`,
         data: null,
       });
     }
 
-    const { token, redirect_url } = await createPayment(result);
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      return res.status(404).json({ status: 404, message: 'User not found', data: null });
+    }
+
+    const bookingCode = await generateUniqueBookingCode(prisma);
+    const booking = await prisma.booking.create({
+      data: {
+        userId: user.id,
+        flightId,
+        totalPrice,
+        bookingDate: new Date(),
+        totalPassenger: passengers.length,
+        status: 'unpaid',
+        bookingCode,
+      },
+    });
+
+    const createdPassengers = await Promise.all(
+      passengers.map((passenger) =>
+        prisma.passenger.create({
+          data: {
+            firstName: passenger.firstName,
+            lastName: passenger.lastName,
+            birthDate: new Date(passenger.birthDate),
+            nationality: passenger.nationality,
+            passportNumber: passenger.passportNumber,
+            passportExpiry: new Date(passenger.passportExpiry),
+          },
+        })
+      )
+    );
+
+    const updatedSeatsAndBookings = await Promise.all(
+      currentSeats.map(async (seat, index) => {
+        try {
+          const updatedSeat = await prisma.seat.update({
+            where: { id: seat.id, status: 'available', version: seat.version },
+            data: {
+              version: {
+                increment: 1,
+              },
+            },
+          });
+
+          await prisma.bookingPassenger.create({
+            data: {
+              bookingId: booking.id,
+              passengerId: createdPassengers[index].id,
+              seatId: updatedSeat.id,
+            },
+          });
+
+          return updatedSeat;
+        } catch (error) {
+          if (error.code === 'P2025') {
+            throw new Error(`Seat ${seat.seatNumber} was modified by another transaction`);
+          }
+          throw error;
+        }
+      })
+    );
+
+    const seatVersionCheck = await prisma.seat.findMany({
+      where: {
+        id: { in: updatedSeatsAndBookings.map((seat) => seat.id) },
+      },
+    });
+
+    const versionMismatch = seatVersionCheck.some((currentSeat) => {
+      const originalSeat = updatedSeatsAndBookings.find((s) => s.id === currentSeat.id);
+      return originalSeat.version !== currentSeat.version;
+    });
+
+    if (versionMismatch) {
+      return res.status(400).json({
+        status: 400,
+        message: 'Seat version mismatch detected after updates',
+        data: null,
+      });
+    }
+
+    const { token, redirect_url } = await createPayment({
+      booking,
+      user,
+      passengers: createdPassengers,
+      seats: updatedSeatsAndBookings,
+    });
 
     return res.status(201).json({
       status: 201,
       message: 'Booking created successfully',
       data: {
-        name: result.user.name,
-        email: result.user.email,
-        phoneNumber: result.user.phoneNumber,
-        bookingId: result.booking.id,
+        name: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        bookingId: booking.id,
         totalPrice,
-        bookingStatus: result.booking.status,
-        bookingCode: result.booking.bookingCode,
-        bookingDate: result.booking.bookingDate,
+        bookingStatus: booking.status,
+        bookingCode: booking.bookingCode,
+        bookingDate: booking.bookingDate,
         totalPassenger: passengers.length,
-        seats: result.seats.map((s) => s.seatNumber),
-        passengers: result.passengers,
+        seats: updatedSeatsAndBookings.map((s) => s.seatNumber),
+        passengers: createdPassengers,
       },
       token: token,
       redirect_url: redirect_url,
