@@ -1,8 +1,8 @@
 const { PrismaClient } = require('@prisma/client');
 const { bookingSchema } = require('../validations/transactionValidation');
 const { generateUniqueBookingCode } = require('../utils/generateRandomCode');
+const { createPayment } = require('../services/payment');
 const prisma = new PrismaClient();
-const midtransClient = require('midtrans-client');
 
 const createBooking = async (req, res) => {
   const { email, flightId, totalPrice, passengers, seats } = req.body;
@@ -143,24 +143,7 @@ const createBooking = async (req, res) => {
       });
     }
 
-    const snap = new midtransClient.Snap({
-      isProduction: false,
-      serverKey: process.env.MIDTRANS_SERVER_KEY,
-      clientKey: process.env.MIDTRANS_CLIENT_KEY,
-    });
-
-    const parameter = {
-      transaction_details: {
-        order_id: result.booking.bookingCode,
-        gross_amount: totalPrice,
-      },
-      customer_details: {
-        first_name: result.user.name,
-        email: result.user.email,
-      },
-    };
-
-    const token = await snap.createTransaction(parameter);
+    const { token, redirect_url } = await createPayment(result);
 
     return res.status(201).json({
       status: 201,
@@ -178,8 +161,8 @@ const createBooking = async (req, res) => {
         seats: result.seats.map((s) => s.seatNumber),
         passengers: result.passengers,
       },
-      token: token.token,
-      redirect_url: token.redirect_url,
+      token: token,
+      redirect_url: redirect_url,
     });
   } catch (error) {
     console.error(error);
