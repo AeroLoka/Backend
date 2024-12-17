@@ -24,10 +24,7 @@ const bookingSchema = Joi.object({
           'string.empty': 'Nama depan tidak boleh kosong',
           'any.required': 'Nama depan diperlukan',
         }),
-        lastName: Joi.string().required().messages({
-          'string.empty': 'Nama belakang tidak boleh kosong',
-          'any.required': 'Nama belakang diperlukan',
-        }),
+        lastName: Joi.string().optional(),
         birthDate: Joi.date().required().messages({
           'date.base': 'Tanggal lahir harus berupa tanggal yang valid',
           'any.required': 'Tanggal lahir diperlukan',
@@ -36,15 +33,12 @@ const bookingSchema = Joi.object({
           'string.empty': 'Kewarganegaraan tidak boleh kosong',
           'any.required': 'Kewarganegaraan diperlukan',
         }),
-        passportNumber: Joi.string().required().messages({
-          'string.empty': 'Nomor paspor tidak boleh kosong',
-          'any.required': 'Nomor paspor diperlukan',
-        }),
-        passportExpiry: Joi.date().greater('now').required().messages({
+        passportNumber: Joi.string().optional(),
+        passportExpiry: Joi.date().greater('now').optional().messages({
           'date.base': 'Tanggal kedaluwarsa paspor harus berupa tanggal yang valid',
           'date.greater': 'Tanggal kedaluwarsa paspor harus lebih besar dari tanggal saat ini',
-          'any.required': 'Tanggal kedaluwarsa paspor diperlukan',
         }),
+        ktpNumber: Joi.string().optional(),
       })
     )
     .min(1)
@@ -56,11 +50,14 @@ const bookingSchema = Joi.object({
     }),
   seats: Joi.array()
     .items(
-      Joi.string().regex(/^[A-Za-z0-9]+$/).required().messages({
-        'string.pattern.base': 'Nomor kursi hanya boleh berisi huruf dan angka',
-        'string.empty': 'Nomor kursi tidak boleh kosong',
-        'any.required': 'Nomor kursi diperlukan',
-      })
+      Joi.string()
+        .regex(/^[A-Za-z0-9]+$/)
+        .required()
+        .messages({
+          'string.pattern.base': 'Nomor kursi hanya boleh berisi huruf dan angka',
+          'string.empty': 'Nomor kursi tidak boleh kosong',
+          'any.required': 'Nomor kursi diperlukan',
+        })
     )
     .min(1)
     .required()
