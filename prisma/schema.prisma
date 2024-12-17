@@ -14,17 +14,24 @@ datasource db {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
-  name          String
-  email         String         @unique
-  phoneNumber   String
-  googleId      String?        @unique
-  password      String
-  isActive      Boolean        @default(false)
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String   @unique
+  phoneNumber String
+  googleId    String?  @unique
+  password    String
+  isActive    Boolean  @default(false)
+  role        userRole @default(user)
+
   bookings      Booking[]
   notifications Notification[]
 
   @@map("user")
+}
+
+enum userRole {
+  admin
+  user
 }
 
 model Notification {

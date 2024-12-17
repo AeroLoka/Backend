@@ -255,7 +255,10 @@ const login = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ email: user.email, name: user.name }, process.env.JWT_SECRET);
+    const token = jwt.sign(
+      { email: user.email, name: user.name, role: user.role },
+      process.env.JWT_SECRET
+    );
 
     return res.status(200).json({
       status: '200',
@@ -412,7 +415,7 @@ const resetPassword = async (req, res) => {
 
 const oauthLogin = (req, res) => {
   const token = jwt.sign(
-    { id: req.user.id, email: req.user.email, name: req.user.name },
+    { id: req.user.id, email: req.user.email, name: req.user.name, role: req.user.role },
     process.env.JWT_SECRET
   );
   res.json({ name: req.user.name, email: req.user.email, token });
