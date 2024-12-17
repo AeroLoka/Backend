@@ -13,7 +13,7 @@ const createBooking = async (req, res) => {
 
   try {
     let currentSeats = await prisma.seat.findMany({
-      where: { flightId, seatNumber: { in: seats } },
+      where: { flightId, seatNumber: { in: seasts } },
     });
 
     const existingSeatNumbers = currentSeats.map((seat) => seat.seatNumber);
@@ -66,6 +66,7 @@ const createBooking = async (req, res) => {
             lastName: passenger.lastName,
             birthDate: new Date(passenger.birthDate),
             nationality: passenger.nationality,
+            ktpNumber: passenger.ktpNumber,
             passportNumber: passenger.passportNumber,
             passportExpiry: new Date(passenger.passportExpiry),
           },
@@ -127,6 +128,11 @@ const createBooking = async (req, res) => {
       user,
       passengers: createdPassengers,
       seats: updatedSeatsAndBookings,
+    });
+
+    await prisma.booking.update({
+      where: { id: booking.id },
+      data: { snap_token: token },
     });
 
     return res.status(201).json({
