@@ -68,6 +68,7 @@ const createBooking = async (req, res) => {
             birthDate: new Date(passenger.birthDate),
             nationality: passenger.nationality,
             ktpNumber: passenger.ktpNumber || null,
+            passportCountry: passenger.passportCountry || null,
             passportNumber: passenger.passportNumber || null,
             passportExpiry: passenger.passportExpiry ? new Date(passenger.passportExpiry) : null,
           },
