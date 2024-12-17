@@ -275,7 +275,7 @@ const handlePaymentNotification = async (req, res) => {
     const transactionStatus = statusResponse.transaction_status;
     const fraudStatus = statusResponse.fraud_status;
 
-    if (transactionStatus === 'capture') {
+    if (transactionStatus === 'capture || settlement') {
       if (fraudStatus === 'accept' || 'settlement') {
         await prisma.booking.update({
           where: { bookingCode: orderId },
@@ -314,7 +314,13 @@ const handlePaymentNotification = async (req, res) => {
       });
     }
 
-    return res.status(200).json({ status: 200, message: 'OK' });
+    return res.status(200).json({
+      status: 200,
+      message: 'OK',
+      data: {
+        status: boo,
+      },
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
