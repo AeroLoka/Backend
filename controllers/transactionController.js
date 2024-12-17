@@ -3,6 +3,7 @@ const { bookingSchema } = require('../validations/transactionValidation');
 const { generateUniqueBookingCode } = require('../utils/generateRandomCode');
 const { createPayment } = require('../services/payment');
 const prisma = new PrismaClient();
+const midtransClient = require('midtrans-client');
 
 const createBooking = async (req, res) => {
   const { email, flightId, totalPrice, passengers, seats } = req.body;
@@ -275,38 +276,33 @@ const handlePaymentNotification = async (req, res) => {
     const fraudStatus = statusResponse.fraud_status;
 
     if (transactionStatus === 'capture') {
-      if (fraudStatus === 'accept') {
+      if (fraudStatus === 'accept' || 'settlement') {
         await prisma.booking.update({
           where: { bookingCode: orderId },
           data: { status: 'paid' },
         });
-      }
-    } else if (transactionStatus === 'settlement') {
-      await prisma.booking.update({
-        where: { bookingCode: orderId },
-        data: { status: 'paid' },
-      });
-      const booking = await prisma.booking.update({
-        where: {
-          bookingCode: orderId,
-        },
-        data: { status: 'paid' },
-        include: {
-          passengers: {
-            include: {
-              seat,
+        const booking = await prisma.booking.update({
+          where: {
+            bookingCode: orderId,
+          },
+          data: { status: 'paid' },
+          include: {
+            passengers: {
+              include: {
+                seat: true,
+              },
             },
           },
-        },
-      });
-      await Promise.all(
-        booking.passengers.map((passenger) => {
-          prisma.seat.update({
-            where: { id: passenger.seatId },
-            data: { status: 'booked' },
-          });
-        })
-      );
+        });
+        await Promise.all(
+          booking.passengers.map((passenger) => {
+            prisma.seat.update({
+              where: { id: passenger.seatId },
+              data: { status: 'booked' },
+            });
+          })
+        );
+      }
     } else if (
       transactionStatus === 'cancel' ||
       transactionStatus === 'deny' ||
