@@ -38,6 +38,8 @@ model Notification {
   id        Int      @id @default(autoincrement())
   userId    Int
   name      String
+  type      String   @default("notifikasi")
+  title     String
   detail    String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
