@@ -24,9 +24,8 @@ const bookingSchema = Joi.object({
           'string.empty': 'Nama depan tidak boleh kosong',
           'any.required': 'Nama depan diperlukan',
         }),
-        lastName: Joi.string().required().messages({
+        lastName: Joi.string().optional().messages({
           'string.empty': 'Nama belakang tidak boleh kosong',
-          'any.required': 'Nama belakang diperlukan',
         }),
         birthDate: Joi.date().required().messages({
           'date.base': 'Tanggal lahir harus berupa tanggal yang valid',
@@ -35,6 +34,16 @@ const bookingSchema = Joi.object({
         nationality: Joi.string().required().messages({
           'string.empty': 'Kewarganegaraan tidak boleh kosong',
           'any.required': 'Kewarganegaraan diperlukan',
+        }),
+        passportNumber: Joi.string().optional().messages({
+          'string.empty': 'Nomor paspor tidak boleh kosong',
+        }),
+        passportExpiry: Joi.date().greater('now').optional().messages({
+          'date.base': 'Tanggal kedaluwarsa paspor harus berupa tanggal yang valid',
+          'date.greater': 'Tanggal kedaluwarsa paspor harus lebih besar dari tanggal saat ini',
+        }),
+        ktpNumber: Joi.string().optional().messages({
+          'string.empty': 'Nomor KTP tidak boleh kosong',
         }),
       })
     )

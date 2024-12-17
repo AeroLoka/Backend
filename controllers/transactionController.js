@@ -13,7 +13,7 @@ const createBooking = async (req, res) => {
 
   try {
     let currentSeats = await prisma.seat.findMany({
-      where: { flightId, seatNumber: { in: seasts } },
+      where: { flightId, seatNumber: { in: seats } },
     });
 
     const existingSeatNumbers = currentSeats.map((seat) => seat.seatNumber);
@@ -63,12 +63,12 @@ const createBooking = async (req, res) => {
         prisma.passenger.create({
           data: {
             firstName: passenger.firstName,
-            lastName: passenger.lastName,
+            lastName: passenger.lastName || null,
             birthDate: new Date(passenger.birthDate),
             nationality: passenger.nationality,
-            ktpNumber: passenger.ktpNumber,
-            passportNumber: passenger.passportNumber,
-            passportExpiry: new Date(passenger.passportExpiry),
+            ktpNumber: passenger.ktpNumber || null,
+            passportNumber: passenger.passportNumber || null,
+            passportExpiry: passenger.passportExpiry ? new Date(passenger.passportExpiry) : null,
           },
         })
       )
