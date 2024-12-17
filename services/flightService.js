@@ -1,90 +1,95 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// INI SEARCHING
-const searchFlight = async (criteria, value) => {
-    if (criteria === 'benua') {
-        return prisma.flight.findMany({
-            where: {
-                airport: {
-                    continent: value
-                }
+const searchFlight = async (params, includePassengers = true) => {
+    const {
+        kotaAsal,
+        kotaTujuan,
+        tanggalKeberangkatan,
+        tanggalKedatangan,
+        penumpangDewasa,
+        penumpangAnak,
+        penumpangBayi,
+        tipeKelas,
+    } = params;
+
+    const totalPenumpang = parseInt(penumpangDewasa || 0) + parseInt(penumpangAnak || 0) + parseInt(penumpangBayi || 0);
+
+    const where = {};
+
+    if (kotaAsal) {
+        where.originCity = { fullname: kotaAsal };
+    }
+
+    if (kotaTujuan) {
+        where.destinationCity = { fullname: kotaTujuan };
+    }
+
+    if (tanggalKeberangkatan) {
+        where.departure = { gte: new Date(tanggalKeberangkatan) };
+    }
+
+    if (tanggalKedatangan) {
+        where.return = { gte: new Date(tanggalKedatangan) };
+    }
+
+    if (tipeKelas) {
+        where.class = tipeKelas;
+    }
+
+    try {
+        const flights = await prisma.flight.findMany({
+            where,
+            include: {
+                originCity: true,
+                destinationCity: true,
+                airlines: true,
+                airport: true,
+                bookings: includePassengers,
             },
-            distinct: ['class'],
-            include: {
-                originCity: true,
-                destinationCity: true,
-                airlines: true,
-                airport: true,
-            }
         });
-    } else if (criteria === 'kelas') {
-        return prisma.flight.findMany({
-            where: { class: value },
-            distinct: ['class'],
-            include: {
-                originCity: true,
-                destinationCity: true,
-                airlines: true,
-                airport: true,
-            }
-        });
-    } else if (criteria === 'kota') {
-        return prisma.flight.findMany({
-            where: {
-                OR: [
-                    { originCity: { fullname: value } },
-                    { destinationCity: { fullname: value } }
-                ]
-            },
-            distinct: ['originCityId', 'destinationCityId'],
-            include: {
-                originCity: true,
-                destinationCity: true,
-                airlines: true,
-                airport: true,
-            }
-        });
-    } else if (criteria === 'negara') {
-        return prisma.flight.findMany({
-            where: {
-                airport: {
-                    city: { fullname: value }
-                }
-            },
-            distinct: ['class'],
-            include: {
-                originCity: true,
-                destinationCity: true,
-                airlines: true,
-                airport: true,
-            }
-        });
-    } else {
+
+        if (includePassengers) {
+            const validFlights = flights.filter(flight => {
+                const validBooking = flight.bookings.some(booking => booking.totalPassenger === totalPenumpang);
+                return validBooking;
+            });
+
+            return validFlights;
+        }
+
+        return flights;
+    } catch (error) {
+        console.error(error);
         return [];
     }
 };
 
-// INI FILTERING
 const filterFlights = async (filter) => {
-  const filters = {
-    'harga-termurah': { price: 'asc' },
-    'harga-termahal': { price: 'desc' },
-    'durasi-terpendek': { duration: 'asc' },
-    'durasi-terpanjang': { duration: 'desc' },
-    'keberangkatan-paling-awal': { departure: 'asc' },
-    'keberangkatan-paling-akhir': { departure: 'desc' },
-    'kedatangan-paling-awal': { return: 'asc' },
-    'kedatangan-paling-akhir': { return: 'desc' },
-  };
+    const sortBy = {
+        'harga-termurah': { price: 'asc' },
+        'harga-termahal': { price: 'desc' },
+        'durasi-terpendek': { duration: 'asc' },
+        'durasi-terpanjang': { duration: 'desc' },
+        'keberangkatan-paling-awal': { departure: 'asc' },
+        'keberangkatan-paling-akhir': { departure: 'desc' },
+        'kedatangan-paling-awal': { return: 'asc' },
+        'kedatangan-paling-akhir': { return: 'desc' },
+    };
 
-  if (filters[filter]) {
-    return prisma.flight.findMany({
-      orderBy: filters[filter],
-    });
-  }
+    if (sortBy[filter]) {
+        return prisma.flight.findMany({
+            orderBy: sortBy[filter],
+            include: {
+                originCity: true,
+                destinationCity: true,
+                airlines: true,
+                airport: true,
+            },
+        });
+    }
 
-  return [];
+    return [];
 };
 
 module.exports = {
