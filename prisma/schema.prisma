@@ -28,10 +28,12 @@ model User {
 }
 
 model Notification {
-  id     Int    @id @default(autoincrement())
-  userId Int
-  name   String
-  detail String
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  name      String
+  detail    String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
 

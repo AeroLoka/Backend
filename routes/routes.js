@@ -27,6 +27,14 @@ const {
   getUserByEmail,
 } = require('../controllers/userController');
 
+const {
+  createNotification,
+  getNotification,
+  updateNotification,
+  deleteNotification,
+} = require('../controllers/notificationControllers');
+
+
 routes.get('/api/users', getAllUsers);
 routes.get('/api/users/email', getUserByEmail);
 routes.put('/api/users', updateUser);
@@ -49,6 +57,12 @@ routes.post('/api/resend-otp', resendOtp);
 routes.post('/api/login', login);
 routes.post('/api/forget-password', sendEmailForgetPassword);
 routes.post('/api/reset-password', resetPassword);
+
+routes.post('/api/notifications/:userId', createNotification);
+routes.get('/api/notifications/:userId', getNotification);
+routes.put('/api/notifications/:id', updateNotification);
+routes.delete('/api/notifications/:userId', deleteNotification);
+
 routes.get(
   '/api/google',
   passport.authenticate('google', {
