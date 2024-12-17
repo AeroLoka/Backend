@@ -31,6 +31,7 @@ const {
   getUserByEmail,
 } = require('../controllers/userController');
 const { getAllSeatByFlightId } = require('../controllers/seatController');
+const { admin } = require('../middleware/admin');
 
 routes.get('/api/users', getAllUsers);
 routes.get('/api/users/email', getUserByEmail);
@@ -45,9 +46,9 @@ routes.get('/api/search-flights', getFlights);
 routes.get('/api/flights/', getAllFlights);
 routes.get('/api/flights/:id', getFlightById);
 
-routes.post('/api/flights/', restrict, createFlight);
-routes.put('/api/flights/:id', restrict, updateFlight);
-routes.delete('/api/flights/:id', restrict, deleteFlight);
+routes.post('/api/flights/', restrict, admin, createFlight);
+routes.put('/api/flights/:id', restrict, admin, updateFlight);
+routes.delete('/api/flights/:id', restrict, admin, deleteFlight);
 
 routes.get('/api/seats/:flightId', getAllSeatByFlightId);
 
