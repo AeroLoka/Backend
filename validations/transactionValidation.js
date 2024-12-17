@@ -35,7 +35,7 @@ const bookingSchema = Joi.object({
         }),
         passportNumber: Joi.string().allow('').optional(),
         passportCountry: Joi.string().allow('').optional(),
-        passportExpiry: Joi.date().greater('now').optional().messages({
+        passportExpiry: Joi.date().allow(null, '').greater('now').optional().messages({
           'date.greater': 'Tanggal kedaluwarsa paspor harus lebih besar dari tanggal saat ini',
         }),
         ktpNumber: Joi.string().allow('').optional(),
