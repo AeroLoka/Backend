@@ -3,19 +3,20 @@ const { searchFlight, filterFlights } = require('../services/flightService');
 const getFlights = async (req, res) => {
   try {
     const {
-      kotaAsal,
-      kotaTujuan,
-      tanggalKeberangkatan,
-      tanggalKedatangan,
-      penumpangDewasa,
-      penumpangAnak,
-      penumpangBayi,
-      tipeKelas,
-      sortBy,
+      from,
+      to,
+      departureDateStart,
+      departureDateEnd,
+      returnDateStart,
+      returnDateEnd,
+      adultPassengers,
+      childPassengers,
+      infantPassengers,
+      seatClass,
     } = req.query;
 
-    if (sortBy) {
-      const flights = await filterFlights(sortBy);
+    if (req.query.sortBy) {
+      const flights = await filterFlights(req.query.sortBy);
 
       if (!flights || flights.length === 0) {
         return res.status(404).json({
@@ -31,44 +32,49 @@ const getFlights = async (req, res) => {
       });
     }
 
-    if (!kotaAsal) {
+    if (!from) {
       return res.status(400).json({
         status: 400,
         success: false,
         message: 'Kota asal tidak boleh kosong',
       });
     }
-    if (!kotaTujuan) {
+
+    if (!to) {
       return res.status(400).json({
         status: 400,
         success: false,
         message: 'kota tujuan tidak boleh kosong',
       });
     }
-    if (!tanggalKeberangkatan) {
+
+    if (!departureDateStart || isNaN(Date.parse(departureDateStart))) {
       return res.status(400).json({
         status: 400,
         success: false,
-        message: 'tanggal keberangkatan tidak boleh kosong',
-      });
-    }
-    if (!tanggalKedatangan) {
-      return res.status(400).json({
-        status: 400,
-        success: false,
-        message: 'Tanggal Kedatangan tidak boleh kosong',
+        message: 'Tanggal keberangkatan tidak valid atau kosong',
       });
     }
 
-    if (!penumpangDewasa && !penumpangAnak && !penumpangBayi) {
+    if (!returnDateStart || isNaN(Date.parse(returnDateStart))) {
       return res.status(400).json({
         status: 400,
         success: false,
-        message: 'Minimal salah satu penumpang (Dewasa, Anak, Bayi) harus diisi',
+        message: 'Tanggal kedatangan tidak valid atau kosong',
       });
     }
 
-    if (!tipeKelas){
+    const totalPassengers = parseInt(adultPassengers || 0) + parseInt(childPassengers || 0) + parseInt(infantPassengers || 0);
+
+    if (totalPassengers <= 0) {
+      return res.status(400).json({
+        status: 400,
+        success: false,
+        message: 'At least one passenger (Adult, Child, Infant) is required',
+      });
+    }
+
+    if (!seatClass) {
       return res.status(400).json({
         status: 400,
         success: false,
@@ -78,14 +84,16 @@ const getFlights = async (req, res) => {
 
     const flights = await searchFlight(
       {
-        kotaAsal,
-        kotaTujuan,
-        tanggalKeberangkatan,
-        tanggalKedatangan,
-        penumpangDewasa,
-        penumpangAnak,
-        penumpangBayi,
-        tipeKelas,
+        from,
+        to,
+        departureDateStart,
+        departureDateEnd,
+        returnDateStart,
+        returnDateEnd,
+        adultPassengers,
+        childPassengers,
+        infantPassengers,
+        seatClass,
       },
       true
     );
@@ -94,7 +102,7 @@ const getFlights = async (req, res) => {
       return res.status(404).json({
         status: 404,
         success: false,
-        message: 'Maaf, Pencarian anda tidak ditemukan',
+        message: 'Maaf, Penerbangan tidak ditemukan.',
       });
     }
 
