@@ -275,8 +275,15 @@ const handlePaymentNotification = async (req, res) => {
     const transactionStatus = statusResponse.transaction_status;
     const fraudStatus = statusResponse.fraud_status;
 
-    if (transactionStatus === 'capture || settlement') {
-      if (fraudStatus === 'accept' || 'settlement') {
+    if (!orderId || !transactionStatus || !fraudStatus) {
+      return res.status(400).json({
+        status: 400,
+        message: 'Invalid notification data',
+      });
+    }
+
+    if (transactionStatus === 'capture' || transactionStatus === 'settlement') {
+      if (fraudStatus === 'accept' || fraudStatus === 'settlement') {
         await prisma.booking.update({
           where: { bookingCode: orderId },
           data: { status: 'paid' },
@@ -296,7 +303,7 @@ const handlePaymentNotification = async (req, res) => {
         });
         await Promise.all(
           booking.passengers.map((passenger) => {
-            prisma.seat.update({
+            return prisma.seat.update({
               where: { id: passenger.seatId },
               data: { status: 'booked' },
             });
