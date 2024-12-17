@@ -337,7 +337,7 @@ async function main() {
       {
         airlinesId: 1,
         airportId: 1,
-        departure: new Date("2025-01-04T07:30:00Z"), 
+        departure: new Date("2025-01-04T07:30:00Z"),
         return: new Date("2025-01-04T12:00:00Z"),
         price: 1000000.0,
         capacity: 180,
@@ -346,11 +346,13 @@ async function main() {
         duration: 120,
         originCityId: 1,
         destinationCityId: 2,
+        imageUrl:
+          "https://ik.imagekit.io/vdeizz3gx/gambar1%20real.png?updatedAt=1734362028179",
       },
       {
         airlinesId: 2,
         airportId: 2,
-        departure: new Date("2025-02-01T10:00:00Z"), 
+        departure: new Date("2025-02-01T10:00:00Z"),
         return: new Date("2025-02-01T14:30:00Z"),
         price: 2000000.0,
         capacity: 150,
@@ -359,11 +361,13 @@ async function main() {
         duration: 270,
         originCityId: 3,
         destinationCityId: 4,
+        imageUrl:
+          "https://ik.imagekit.io/vdeizz3gx/gambar1%20real.png?updatedAt=1734362028179",
       },
       {
         airlinesId: 3,
         airportId: 3,
-        departure: new Date("2025-03-01T09:00:00Z"), 
+        departure: new Date("2025-03-01T09:00:00Z"),
         return: new Date("2025-03-01T14:00:00Z"),
         price: 1250000.0,
         capacity: 160,
@@ -372,11 +376,13 @@ async function main() {
         duration: 300,
         originCityId: 2,
         destinationCityId: 4,
+        imageUrl:
+          "https://ik.imagekit.io/vdeizz3gx/gambar1%20real.png?updatedAt=1734362028179",
       },
       {
         airlinesId: 4,
         airportId: 4,
-        departure: new Date("2025-04-01T13:00:00Z"), 
+        departure: new Date("2025-04-01T13:00:00Z"),
         return: new Date("2025-04-01T18:30:00Z"),
         price: 2500000.0,
         capacity: 200,
@@ -385,11 +391,13 @@ async function main() {
         duration: 330,
         originCityId: 4,
         destinationCityId: 5,
+        imageUrl:
+          "https://ik.imagekit.io/vdeizz3gx/gambar1%20real.png?updatedAt=1734362028179",
       },
       {
         airlinesId: 5,
         airportId: 5,
-        departure: new Date("2025-05-20T05:30:00Z"), 
+        departure: new Date("2025-05-20T05:30:00Z"),
         return: new Date("2025-05-20T09:30:00Z"),
         price: 1000000.0,
         capacity: 100,
@@ -398,6 +406,8 @@ async function main() {
         duration: 240,
         originCityId: 1,
         destinationCityId: 3,
+        imageUrl:
+          "https://ik.imagekit.io/vdeizz3gx/gambar1%20real.png?updatedAt=1734362028179",
       },
       {
         airlinesId: 1,
@@ -411,6 +421,8 @@ async function main() {
         duration: 180,
         originCityId: 2,
         destinationCityId: 3,
+        imageUrl:
+          "https://ik.imagekit.io/vdeizz3gx/gambar1%20real.png?updatedAt=1734362028179",
       },
       {
         airlinesId: 2,
@@ -424,6 +436,8 @@ async function main() {
         duration: 320,
         originCityId: 4,
         destinationCityId: 1,
+        imageUrl:
+          "https://ik.imagekit.io/vdeizz3gx/gambar1%20real.png?updatedAt=1734362028179",
       },
       {
         airlinesId: 3,
@@ -437,6 +451,8 @@ async function main() {
         duration: 150,
         originCityId: 5,
         destinationCityId: 2,
+        imageUrl:
+          "https://ik.imagekit.io/vdeizz3gx/gambar1%20real.png?updatedAt=1734362028179",
       },
       {
         airlinesId: 4,
@@ -450,6 +466,8 @@ async function main() {
         duration: 300,
         originCityId: 1,
         destinationCityId: 4,
+        imageUrl:
+          "https://ik.imagekit.io/vdeizz3gx/gambar1%20real.png?updatedAt=1734362028179",
       },
       {
         airlinesId: 5,
@@ -463,6 +481,8 @@ async function main() {
         duration: 220,
         originCityId: 3,
         destinationCityId: 5,
+        imageUrl:
+          "https://ik.imagekit.io/vdeizz3gx/gambar1%20real.png?updatedAt=1734362028179",
       },
       {
         airlinesId: 1,
@@ -476,6 +496,8 @@ async function main() {
         duration: 210,
         originCityId: 2,
         destinationCityId: 4,
+        imageUrl:
+          "https://ik.imagekit.io/vdeizz3gx/gambar1%20real.png?updatedAt=1734362028179",
       },
       {
         airlinesId: 2,
@@ -489,6 +511,8 @@ async function main() {
         duration: 280,
         originCityId: 4,
         destinationCityId: 3,
+        imageUrl:
+          "https://ik.imagekit.io/vdeizz3gx/gambar1%20real.png?updatedAt=1734362028179",
       },
       {
         airlinesId: 3,
@@ -502,6 +526,8 @@ async function main() {
         duration: 230,
         originCityId: 1,
         destinationCityId: 5,
+        imageUrl:
+          "https://ik.imagekit.io/vdeizz3gx/gambar1%20real.png?updatedAt=1734362028179",
       },
       {
         airlinesId: 4,
@@ -515,6 +541,8 @@ async function main() {
         duration: 360,
         originCityId: 5,
         destinationCityId: 2,
+        imageUrl:
+          "https://ik.imagekit.io/vdeizz3gx/gambar1%20real.png?updatedAt=1734362028179",
       },
       {
         airlinesId: 5,
@@ -528,6 +556,8 @@ async function main() {
         duration: 200,
         originCityId: 3,
         destinationCityId: 4,
+        imageUrl:
+          "https://ik.imagekit.io/vdeizz3gx/gambar1%20real.png?updatedAt=1734362028179",
       },
     ],
   });

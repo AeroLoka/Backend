@@ -1,7 +1,7 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-const flightSchema = require('../validations/flightValidations');
+const flightSchema = require("../validations/flightValidations");
 
 const getAllFlights = async (req, res) => {
   const { limit = 10, page = 1 } = req.query;
@@ -25,14 +25,14 @@ const getAllFlights = async (req, res) => {
     if (flights.length === 0) {
       return res.status(404).json({
         status: 404,
-        message: 'No flights found',
+        message: "No flights found",
         data: null,
       });
     }
 
     return res.status(200).json({
       status: 200,
-      message: 'Data retrieved successfully',
+      message: "Data retrieved successfully",
       data: flights,
       meta: {
         total: totalFlights,
@@ -45,7 +45,7 @@ const getAllFlights = async (req, res) => {
     console.error(error);
     return res.status(500).json({
       status: 500,
-      message: 'Internal Server Error',
+      message: "Internal Server Error",
       data: null,
     });
   }
@@ -57,7 +57,7 @@ const getFlightById = async (req, res) => {
     if (isNaN(flightId)) {
       return res.status(400).json({
         status: 400,
-        message: 'Invalid flight ID',
+        message: "Invalid flight ID",
         data: null,
       });
     }
@@ -75,27 +75,28 @@ const getFlightById = async (req, res) => {
     if (!flight) {
       return res.status(404).json({
         status: 404,
-        message: 'Flight not found',
+        message: "Flight not found",
         data: null,
       });
     }
 
     return res.status(200).json({
       status: 200,
-      message: 'Data retrieved successfully',
+      message: "Data retrieved successfully",
       data: flight,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       status: 500,
-      message: 'Internal Server Error',
+      message: "Internal Server Error",
       data: null,
     });
   }
 };
 
 const createFlight = async (req, res) => {
+  // Validasi request body untuk flight
   const { error } = flightSchema.validate(req.body);
   if (error) {
     return res.status(400).json({
@@ -106,6 +107,40 @@ const createFlight = async (req, res) => {
   }
 
   try {
+    // 1. Validasi file upload (cek keberadaan file)
+    if (!req.file || req.file.size === 0) {
+      return res.status(400).json({
+        status: 400,
+        message: "Bad request - No file uploaded",
+        data: null,
+      });
+    }
+
+    // 2. Konversi file buffer ke base64
+    let stringFile = req.file.buffer.toString("base64");
+    const fileName = req.body.judul || req.file.originalname;
+
+    // 3. Upload ke ImageKit
+    const uploadImage = await imageKit.upload({
+      fileName: fileName,
+      file: stringFile,
+    });
+
+    console.log(uploadImage, "===> INI uploadImage");
+
+    // 4. Simpan informasi image ke database Prisma
+    const resultImage = await prisma.image.create({
+      data: {
+        judul: fileName,
+        imageUrl: uploadImage.url,
+        fileId: uploadImage.fileId,
+        deskripsi: req.body.deskripsi || "deskripsi tempelan", // Default deskripsi jika kosong
+      },
+    });
+
+    console.log(resultImage, "===> INI resultImage");
+
+    // 5. Simpan data flight ke database Prisma
     const flight = await prisma.flight.create({
       data: {
         airlinesId: req.body.airlinesId,
@@ -119,20 +154,31 @@ const createFlight = async (req, res) => {
         class: req.body.class,
         information: req.body.information,
         duration: req.body.duration,
+        imageId: resultImage.id, // Relasi ke tabel image jika ada kolom imageId
       },
     });
 
+    // 6. Response sukses
     return res.status(201).json({
       status: 201,
-      message: 'Resource created successfully',
-      data: flight,
+      message: "Resource created successfully",
+      data: {
+        flight,
+        image: {
+          imagekitName: uploadImage.name,
+          fileId: uploadImage.fileId,
+          imageUrl: uploadImage.url,
+        },
+      },
     });
   } catch (error) {
-    console.error(error);
+    console.error(error, "===> INI ERROR createFlight");
+
     return res.status(500).json({
       status: 500,
-      message: 'Internal Server Error',
-      data: null,
+      message:
+        "Internal Server Error - gagal membuat data flight atau upload image",
+      error: error.message,
     });
   }
 };
@@ -152,7 +198,7 @@ const updateFlight = async (req, res) => {
     if (isNaN(flightId)) {
       return res.status(400).json({
         status: 400,
-        message: 'Invalid flight ID',
+        message: "Invalid flight ID",
         data: null,
       });
     }
@@ -177,21 +223,21 @@ const updateFlight = async (req, res) => {
     if (!flight) {
       return res.status(404).json({
         status: 404,
-        message: 'Flight not found',
+        message: "Flight not found",
         data: null,
       });
     }
 
     return res.status(200).json({
       status: 200,
-      message: 'Resource updated successfully',
+      message: "Resource updated successfully",
       data: flight,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       status: 500,
-      message: 'Internal Server Error',
+      message: "Internal Server Error",
       data: null,
     });
   }
@@ -203,7 +249,7 @@ const deleteFlight = async (req, res) => {
     if (isNaN(flightId)) {
       return res.status(400).json({
         status: 400,
-        message: 'Invalid flight ID',
+        message: "Invalid flight ID",
         data: null,
       });
     }
@@ -214,24 +260,30 @@ const deleteFlight = async (req, res) => {
 
     return res.status(200).json({
       status: 200,
-      message: 'Resource deleted successfully',
+      message: "Resource deleted successfully",
       data: flight,
     });
   } catch (error) {
     console.error(error);
-    if (error.code === 'P2025') {
+    if (error.code === "P2025") {
       return res.status(404).json({
         status: 404,
-        message: 'Flight not found',
+        message: "Flight not found",
         data: null,
       });
     }
     return res.status(500).json({
       status: 500,
-      message: 'Internal Server Error',
+      message: "Internal Server Error",
       data: null,
     });
   }
 };
 
-module.exports = { createFlight, deleteFlight, getAllFlights, getFlightById, updateFlight };
+module.exports = {
+  createFlight,
+  deleteFlight,
+  getAllFlights,
+  getFlightById,
+  updateFlight,
+};
