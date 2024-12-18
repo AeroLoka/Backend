@@ -7,6 +7,7 @@ const {
   createBooking,
   getAllBookingsByUserId,
   handlePaymentNotification,
+  getBookingByBookingCode,
 } = require("../controllers/transactionController");
 const { getFlights } = require("../controllers/flightController");
 const {
@@ -35,12 +36,21 @@ const {
 const { getAllSeatByFlightId } = require("../controllers/seatController");
 const { admin } = require("../middleware/admin");
 
+const {
+  createNotification,
+  getNotificationByUserId,
+  updateNotification,
+  deleteNotificationByUserId,
+  getAllNotification,
+} = require("../controllers/notificationControllers");
+
 routes.get("/api/users", getAllUsers);
 routes.get("/api/users/email", getUserByEmail);
 routes.put("/api/users", updateUser);
 routes.delete("/api/users", deleteUser);
 
 routes.post("/api/booking", restrict, createBooking);
+routes.get("/api/booking", restrict, getBookingByBookingCode);
 routes.get("/api/booking/:userId", restrict, getAllBookingsByUserId);
 routes.post("/api/booking/notification", handlePaymentNotification);
 
@@ -60,6 +70,13 @@ routes.post("/api/resend-otp", resendOtp);
 routes.post("/api/login", login);
 routes.post("/api/forget-password", sendEmailForgetPassword);
 routes.post("/api/reset-password", resetPassword);
+
+routes.post("/api/notifications/:userId", createNotification);
+routes.get("/api/notifications/:userId", getNotificationByUserId);
+routes.put("/api/notifications/:id", updateNotification);
+routes.delete("/api/notifications/:userId", deleteNotificationByUserId);
+routes.get("/api/notifications/", getAllNotification);
+
 routes.get(
   "/api/google",
   passport.authenticate("google", {

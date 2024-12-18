@@ -68,6 +68,7 @@ const createBooking = async (req, res) => {
             birthDate: new Date(passenger.birthDate),
             nationality: passenger.nationality,
             ktpNumber: passenger.ktpNumber || null,
+            passportCountry: passenger.passportCountry || null,
             passportNumber: passenger.passportNumber || null,
             passportExpiry: passenger.passportExpiry ? new Date(passenger.passportExpiry) : null,
           },
@@ -165,6 +166,60 @@ const createBooking = async (req, res) => {
   }
 };
 
+const getBookingByBookingCode = async (req, res) => {
+  const { bookingCode } = req.query;
+
+  if (!bookingCode) {
+    return res.status(400).json({
+      status: '400',
+      message: 'Email query parameter is required',
+      data: null,
+    });
+  }
+
+  try {
+    const booking = await prisma.booking.findUnique({
+      where: { bookingCode },
+      include: {
+        flight: {
+          include: {
+            airport: true,
+            destinationCity: true,
+            originCity: true,
+          },
+        },
+        passengers: {
+          include: {
+            passenger: true,
+            seat: true,
+          },
+        },
+      },
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        status: 404,
+        message: 'Booking not found',
+        data: null,
+      });
+    }
+
+    return res.status(200).json({
+      status: 200,
+      message: 'Booking retrieved successfully',
+      data: booking,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: 500,
+      message: 'Internal Server Error',
+      data: null,
+    });
+  }
+};
+
 const getAllBookingsByUserId = async (req, res) => {
   const { userId } = req.params;
   const userIdNumber = Number(userId);
@@ -233,9 +288,19 @@ const getAllBookingsByUserId = async (req, res) => {
     const bookings = await prisma.booking.findMany({
       where: filters,
       include: {
-        flight: true,
-        passengers: true,
-        user: true,
+        flight: {
+          include: {
+            airport: true,
+            destinationCity: true,
+            originCity: true,
+          },
+        },
+        passengers: {
+          include: {
+            passenger: true,
+            seat: true,
+          },
+        },
       },
     });
 
@@ -335,4 +400,9 @@ const handlePaymentNotification = async (req, res) => {
   }
 };
 
-module.exports = { createBooking, getAllBookingsByUserId, handlePaymentNotification };
+module.exports = {
+  createBooking,
+  getAllBookingsByUserId,
+  handlePaymentNotification,
+  getBookingByBookingCode,
+};

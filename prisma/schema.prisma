@@ -35,10 +35,14 @@ enum userRole {
 }
 
 model Notification {
-  id     Int    @id @default(autoincrement())
-  userId Int
-  name   String
-  detail String
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  name      String
+  type      String   @default("notifikasi")
+  title     String
+  detail    String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
 
@@ -158,15 +162,16 @@ model BookingPassenger {
 }
 
 model Passenger {
-  id             Int                @id @default(autoincrement())
-  firstName      String
-  lastName       String?
-  birthDate      DateTime
-  nationality    String
-  ktpNumber      String?
-  passportNumber String?
-  passportExpiry DateTime?
-  bookings       BookingPassenger[]
+  id              Int                @id @default(autoincrement())
+  firstName       String
+  lastName        String?
+  birthDate       DateTime
+  nationality     String
+  ktpNumber       String?
+  passportNumber  String?
+  passportCountry String?
+  passportExpiry  DateTime?
+  bookings        BookingPassenger[]
 
   @@map("passenger")
 }
