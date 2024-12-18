@@ -197,6 +197,22 @@ const updateFlight = async (req, res) => {
         data: null,
       });
     }
+    let stringFile = req.file.buffer.toString("base64");
+    // console.log(stringFile, "ini string file");
+    const fileName = req.body.judul || req.file.originalname;
+    // console.log(stringFile, "ini file name");
+
+    const uploadImage = await imageKit.upload({
+      fileName: fileName,
+      file: stringFile,
+    });
+    console.log(uploadImage, "===> INI dari update");
+    const data4 = {
+      judul: fileName,
+      imageUrl: uploadImage.url,
+      fileId: uploadImage.fileId,
+      deskripsi: req.body.deskripsi || "deskripsi ",
+    };
     // const data4 = {
     //   imageUrl: uploadImage.url,
     // };
@@ -214,7 +230,7 @@ const updateFlight = async (req, res) => {
         class: req.body.class,
         information: req.body.information,
         duration: +req.body.duration,
-        // imageUrl: uploadImage.url,
+        imageUrl: uploadImage.url,
       },
     });
 
