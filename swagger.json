@@ -2,21 +2,27 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Flight Management API",
-    "version": "1.0.0",
-    "description": "API documentation for managing flights."
+    "version": "100",
+    "description": "API documentation for managing flights"
   },
+
   "servers": [
   {
     "url": "http://localhost:3000",
     "description": "Local development server"
+  },
+  {
+    "url": "https://aeroloka-backend-development.up.railway.app",
+    "description": "Production server"
   }
   ],
+
   "paths": {
     "/api/flights": {
       "get": {
         "tags": ["Flights"],
         "summary": "Get all flights",
-        "description": "Retrieve a paginated list of flights.",
+        "description": "Retrieve a paginated list of flights",
         "parameters": [
           {
             "$ref": "#/components/parameters/Page"
@@ -27,7 +33,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Data retrieved successfully.",
+            "description": "Data retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -37,17 +43,38 @@
             }
           },
           "404": {
-            "description": "No flights found."
+            "description": "No flights found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "No flights found",
+                  "data": null
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error."
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
           }
         }
       },
       "post": {
         "tags": ["Flights"],
         "summary": "Create a flight",
-        "description": "Add a new flight to the database.",
+        "description": "Add a new flight to the database",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -60,7 +87,7 @@
         },
         "responses": {
           "201": {
-            "description": "Flight created successfully.",
+            "description": "Flight created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -70,33 +97,57 @@
             }
           },
           "400": {
-            "description": "Invalid request body."
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Invalid request body",
+                  "data": null
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error."
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
           }
         }
       }
     },
+
     "/api/flights/{id}": {
       "get": {
         "tags": ["Flights"],
         "summary": "Get flight by ID",
-        "description": "Retrieve a single flight by its ID.",
+        "description": "Retrieve a single flight by its ID",
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "description": "ID of the flight.",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
+            "$ref": "#/components/parameters/Id"
           }
         ],
         "responses": {
           "200": {
-            "description": "Data retrieved successfully.",
+            "description": "Data retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -106,29 +157,53 @@
             }
           },
           "400": {
-            "description": "Invalid flight ID."
+            "description": "Invalid flight ID",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Invalid flight ID",
+                  "data": null
+                }
+              }
+            }
           },
           "404": {
-            "description": "Flight not found."
+            "description": "Flight with the specified ID not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "Flight not found",
+                  "data": null
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error."
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
           }
         }
       },
       "put": {
         "tags": ["Flights"],
         "summary": "Update flight",
-        "description": "Update an existing flight.",
+        "description": "Update an existing flight",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "description": "ID of the flight to update.",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
+            "$ref": "#/components/parameters/Id"
           }
         ],
         "requestBody": {
@@ -143,7 +218,7 @@
         },
         "responses": {
           "200": {
-            "description": "Flight updated successfully.",
+            "description": "Flight updated successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -153,52 +228,155 @@
             }
           },
           "400": {
-            "description": "Invalid flight ID or request body."
+            "description": "Invalid flight ID or request body",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "ValidationError": {
+                    "summary": "Invalid request body",
+                    "value": {
+                      "status": 400,
+                      "message": "Invalid request body",
+                      "data": null
+                    }
+                  },
+                  "InvalidFlightID": {
+                    "summary": "Invalid Flight ID",
+                    "value": {
+                      "status": 400,
+                      "message": "Invalid flight ID",
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Flight not found."
+            "description": "Flight not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "Flight not found",
+                  "data": null
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error."
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
           }
         }
       },
       "delete": {
         "tags": ["Flights"],
         "summary": "Delete flight",
-        "description": "Delete a flight by its ID.",
+        "description": "Delete a flight by its ID",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "description": "ID of the flight to delete.",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
+            "$ref": "#/components/parameters/Id"
           }
         ],
         "responses": {
           "200": {
-            "description": "Flight deleted successfully."
+            "description": "Flight deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 200,
+                  "message": "Flight deleted successfully",
+                  "data": null
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid flight ID."
+            "description": "Invalid flight ID",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Invalid flight ID",
+                  "data": null
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Flight not found."
+            "description": "Flight not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "Flight not found",
+                  "data": null
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error."
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
           }
         }
       }
     },
+
     "/api/booking": {
       "post": {
         "tags": ["Bookings"],
         "summary": "Create a booking",
-        "description": "Add a new booking to the database.",
+        "description": "Add a new booking to the database",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -211,7 +389,7 @@
         },
         "responses": {
           "201": {
-            "description": "Booking created successfully.",
+            "description": "Booking created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -221,24 +399,84 @@
             }
           },
           "400": {
-            "description": "Invalid request body."
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Error message",
+                  "data": null
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Data not found",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "User not found": {
+                    "summary": "User not found",
+                    "value": {
+                      "status": 404,
+                      "message": "User not found",
+                      "data": null
+                    }
+                  },
+                  "Flight not found": {
+                    "summary": "Flight not found",
+                    "value": {
+                      "status": 404,
+                      "message": "Flight not found",
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error."
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
           }
         }
       }
     },
+
     "/api/booking/{userId}": {
       "get": {
         "tags": ["Bookings"],
         "summary": "Get bookings by user ID",
-        "description": "Retrieve a list of bookings for a specific user.",
+        "description": "Retrieve a list of bookings for a specific user",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "userId",
             "in": "path",
-            "description": "ID of the user.",
+            "description": "ID of the user",
             "required": true,
             "schema": {
               "type": "integer"
@@ -247,7 +485,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Data retrieved successfully.",
+            "description": "Data retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -255,15 +493,97 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid user ID",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Invalid from date format": {
+                    "summary": "Invalid from date format",
+                    "value": {
+                      "status": 400,
+                      "message": "Invalid from date format",
+                      "data": null
+                    }
+                  },
+                  "Invalid to date format": {
+                    "summary": "Invalid to date format",
+                    "value": {
+                      "status": 400,
+                      "message": "Invalid to date format",
+                      "data": null
+                    }
+                  },
+                  "From date cannot be after to date": {
+                    "summary": "From date cannot be after to date",
+                    "value": {
+                      "status": 400,
+                      "message": "From date cannot be after to date",
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "User not found": {
+                    "summary": "User not found",
+                    "value": {
+                      "status": 404,
+                      "message": "User not found",
+                      "data": null
+                    }
+                  },
+                  "No bookings found": {
+                    "summary": "No bookings found",
+                    "value": {
+                      "status": 404,
+                      "message": "No bookings found for this user",
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
           }
         }
       }
     },
+
     "/api/search-flights": {
       "get": {
         "tags": ["Search and Filter Flights"],
         "summary": "Search for flights",
-        "description": "Retrieve a list of flights based on search criteria.",
+        "description": "Retrieve a list of flights based on search criteria",
         "parameters": [
           {
             "$ref": "#/components/parameters/Criteria"
@@ -277,7 +597,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Flights retrieved successfully.",
+            "description": "Flights retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -287,22 +607,61 @@
             }
           },
           "400": {
-            "description": "Invalid criteria or filter provided."
+            "description": "Invalid criteria or filter provided",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Invalid criteria": {
+                    "summary": "Invalid criteria",
+                    "value": {
+                      "status": 400,
+                      "message": "Invalid criteria",
+                      "data": null
+                    }
+                  },
+                  "Invalid filter": {
+                    "summary": "Invalid filter",
+                    "value": {
+                      "status": 400,
+                      "message": "Invalid filter",
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
           },
           "404": {
-            "description": "No flights found matching the criteria or filter."
+            "description": "No flights found matching the criteria or filter",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "No flights found matching the criteria or filter",
+                  "data": null
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
           }
         }
       }
     },
+
     "/api/register": {
       "post": {
         "tags": ["Auth"],
         "summary": "Register user",
-        "description": "Register a new user.",
+        "description": "Register a new user",
         "requestBody": {
           "required": true,
           "content": {
@@ -315,7 +674,7 @@
         },
         "responses": {
           "201": {
-            "description": "User registered successfully.",
+            "description": "User registered successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -325,19 +684,49 @@
             }
           },
           "400": {
-            "description": "User email already exists."
+            "description": "User email already exists",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "User already exists": {
+                    "summary": "User already exists",
+                    "value": {
+                      "status": 400,
+                      "message": "User already exists",
+                      "data": null
+                    }
+                  },
+                  "Bad request": {
+                    "summary": "Bad request",
+                    "value": {
+                      "status": 400,
+                      "message": "Error message",
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
           },
           "500": {
-            "description": "Error generating token."
+            "description": "Error generating token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
           }
         }
       }
     },
+
     "/api/verify-otp": {
       "post": {
         "tags": ["Auth"],
         "summary": "Verify OTP",
-        "description": "Verify OTP.",
+        "description": "Verify OTP",
         "parameters": [
           {
             "$ref": "#/components/parameters/Token"
@@ -355,7 +744,7 @@
         },
         "responses": {
           "200": {
-            "description": "OTP verified successfully.",
+            "description": "OTP verified successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -365,22 +754,77 @@
             }
           },
           "400": {
-            "description": "Invalid or expired token."
+            "description": "Invalid or expired token",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Invalid or expired token": {
+                    "summary": "Invalid or expired token",
+                    "value": {
+                      "status": 400,
+                      "message": "Invalid or expired token",
+                      "data": null
+                    }
+                  },
+                  "Expired OTP": {
+                    "summary": "Expired OTP",
+                    "value": {
+                      "status": 400,
+                      "message": "OTP has expired",
+                      "data": null
+                    }
+                  },
+                  "Invalid OTP": {
+                    "summary": "Invalid OTP",
+                    "value": {
+                      "status": 400,
+                      "message": "Invalid OTP",
+                      "data": null
+                    }
+                  },
+                  "Bad request": {
+                    "summary": "Bad request",
+                    "value": {
+                      "status": 400,
+                      "message": "Error message",
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
           },
           "404": {
-            "description": "User not found."
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "User not found",
+                  "data": null
+                }
+              }
+            }
           },
           "500": {
-            "description": "Error verifying OTP."
+            "description": "Error verifying OTP",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
           }
         }
       }
     },
+
     "/api/resend-otp": {
       "post": {
         "tags": ["Auth"],
         "summary": "Resend OTP",
-        "description": "Resend OTP.",
+        "description": "Resend OTP",
         "requestBody": {
           "required": true,
           "content": {
@@ -393,7 +837,7 @@
         },
         "responses": {
           "200": {
-            "description": "OTP resent successfully.",
+            "description": "OTP resent successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -403,22 +847,76 @@
             }
           },
           "400": {
-            "description": "Invalid or expired token."
+            "description": "Invalid or expired token",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "User is already active": {
+                    "summary": "User is already active",
+                    "value": {
+                      "status": 400,
+                      "message": "User is already active",
+                      "data": null
+                    }
+                  },
+                  "Bad request": {
+                    "summary": "Bad request",
+                    "value": {
+                      "status": 400,
+                      "message": "Error message",
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
           },
           "404": {
-            "description": "User not found."
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "User not found",
+                  "data": null
+                }
+              }
+            }
           },
           "500": {
-            "description": "Error resending OTP."
+            "description": "Error resending OTP",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Error generating token": {
+                    "summary": "Error generating token",
+                    "value": {
+                      "status": 500,
+                      "message": "Error generating token",
+                      "data": null
+                    }
+                  },
+                  "Error resending OTP": {
+                    "summary": "Error resending OTP",
+                    "value": {
+                      "status": 500,
+                      "message": "Error resending OTP",
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
+
     "/api/login": {
       "post": {
         "tags": ["Auth"],
         "summary": "Login user",
-        "description": "Login a user.",
+        "description": "Login a user",
         "requestBody": {
           "required": true,
           "content": {
@@ -431,7 +929,7 @@
         },
         "responses": {
           "200": {
-            "description": "User logged in successfully.",
+            "description": "User logged in successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -441,19 +939,73 @@
             }
           },
           "400": {
-            "description": "Invalid email or password."
+            "description": "Invalid email or password",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Invalid email or password",
+                  "data": null
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Invalid credentials",
+                  "data": null
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Invalid credentials": {
+                    "summary": "Invalid credentials",
+                    "value": {
+                      "status": 404,
+                      "message": "invalid credentials",
+                      "data": null
+                    }
+                  },
+                  "User not found": {
+                    "summary": "User not found",
+                    "value": {
+                      "status": 404,
+                      "message": "User not found",
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
           },
           "500": {
-            "description": "Error generating token."
+            "description": "Error generating token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
           }
         }
       }
     },
+
     "/api/forget-password": {
       "post": {
         "tags": ["Auth"],
         "summary": "Forget password",
-        "description": "Forget password.",
+        "description": "Forget password",
         "requestBody": {
           "required": true,
           "content": {
@@ -466,7 +1018,7 @@
         },
         "responses": {
           "200": {
-            "description": "Password reset link sent successfully.",
+            "description": "Password reset link sent successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -476,19 +1028,48 @@
             }
           },
           "400": {
-            "description": "Invalid email."
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Invalid email",
+                  "data": null
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not active",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 403,
+                  "message": "User is not active. Please verify your email first.",
+                  "data": null
+                }
+              }
+            }
           },
           "500": {
-            "description": "Error sending password reset link."
+            "description": "Error sending password reset link",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
           }
         }
       }
     },
+
     "/api/reset-password": {
       "post": {
         "tags": ["Auth"],
         "summary": "Reset password",
-        "description": "Reset password.",
+        "description": "Reset password",
         "parameters": [
           {
             "$ref": "#/components/parameters/Token"
@@ -506,7 +1087,7 @@
         },
         "responses": {
           "200": {
-            "description": "Password reset successfully.",
+            "description": "Password reset successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -516,25 +1097,76 @@
             }
           },
           "400": {
-            "description": "Invalid or expired token."
+            "description": "Invalid or expired token",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Password do not match": {
+                    "summary": "Password do not match",
+                    "value": {
+                      "status": 400,
+                      "message": "Password do not match",
+                      "data": null
+                    }
+                  },
+                  "Bad request": {
+                    "summary": "Bad request",
+                    "value": {
+                      "status": 400,
+                      "message": "Error message",
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null
+                }
+              }
+            }
           },
           "404": {
-            "description": "User not found."
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "User not found",
+                  "data": null
+                }
+              }
+            }
           },
           "500": {
-            "description": "Error resetting password."
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
           }
         }
       }
     },
+
     "/api/users": {
       "get": {
         "tags": ["User"],
         "summary": "Get all users",
-        "description": "Get all users.",
+        "description": "Get all users",
         "responses": {
           "200": {
-            "description": "Data retrieved successfully.",
+            "description": "Data retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -544,47 +1176,24 @@
             }
           },
           "500": {
-            "description": "Error retrieving users."
-          }
-        }
-      }
-    },
-    "/api/users/{id}": {
-      "get": {
-        "tags": ["User"],
-        "summary": "Get user by ID",
-        "description": "Get user by ID.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Id"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Data retrieved successfully.",
+            "description": "Error retrieving users",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/500"
                 }
               }
             }
-          },
-          "404": {
-            "description": "User not found."
-          },
-          "500": {
-            "description": "Error retrieving user."
           }
         }
       },
       "put": {
         "tags": ["User"],
-        "summary": "Update user by ID",
-        "description": "Update user by ID.",
+        "summary": "Update user by Email",
+        "description": "Update user by Email",
         "parameters": [
           {
-            "$ref": "#/components/parameters/Id"
+            "$ref": "#/components/parameters/Email"
           }
         ],
         "requestBody": {
@@ -599,7 +1208,7 @@
         },
         "responses": {
           "200": {
-            "description": "User updated successfully.",
+            "description": "User updated successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -608,41 +1217,149 @@
               }
             }
           },
-          "404": {
-            "description": "User not found."
+          "400": {
+            "description": "Error updating user",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Email query parameter is required": {
+                    "summary": "Email query parameter is required",
+                    "value": {
+                      "status": 400,
+                      "message": "Email query parameter is required",
+                      "data": null
+                    }
+                  },
+                  "Bad request": {
+                    "summary": "Bad request",
+                    "value": {
+                      "status": 400,
+                      "message": "Error message",
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
           },
           "500": {
-            "description": "Error updating user."
+            "description": "Error updating user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 500,
+                  "message": "Error updating user",
+                  "data": null
+                }
+              }
+            }
           }
         }
       },
       "delete": {
         "tags": ["User"],
-        "summary": "Delete user by ID",
-        "description": "Delete user by ID.",
+        "summary": "Delete user by Email",
+        "description": "Delete user by Email",
         "parameters": [
           {
-            "$ref": "#/components/parameters/Id"
+            "$ref": "#/components/parameters/Email"
           }
         ],
         "responses": {
           "200": {
-            "description": "User deleted successfully.",
+            "description": "User deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 200,
+                  "message": "User deleted successfully",
+                  "data": null
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email query parameter is required",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Email query parameter is required",
+                  "data": null
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error deactivating user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 500,
+                  "message": "Error deactivating user",
+                  "error": "Error message"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/api/users/email": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Get user by Email",
+        "description": "Get user by Email",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Email"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "nullable": true,
-                  "example": null
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email query parameter is required",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Email query parameter is required",
+                  "data": null
                 }
               }
             }
           },
           "404": {
-            "description": "User not found."
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "User not found",
+                  "data": null
+                }
+              }
+            }
           },
           "500": {
-            "description": "Error deleting user."
+            "description": "Error retrieving user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
           }
         }
       }
@@ -650,11 +1367,19 @@
   },
 
   "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+
     "parameters": {
       "Criteria": {
         "name": "criteria",
         "in": "query",
-        "description": "The search criterion to filter flights.",
+        "description": "The search criterion to filter flights",
         "required": false,
         "schema": {
           "type": "string",
@@ -664,7 +1389,7 @@
       "Filter": {
         "name": "filter",
         "in": "query",
-        "description": "The filter to apply to the flights.",
+        "description": "The filter to apply to the flights",
         "required": true,
         "schema": {
           "type": "string",
@@ -683,8 +1408,8 @@
       "Value": {
         "name": "value",
         "in": "query",
-        "description": "The value to filter the flights.",
-        "required": true,
+        "description": "The value to filter the flights",
+        "required": false,
         "schema": {
           "type": "string"
         }
@@ -692,7 +1417,7 @@
       "Page": {
         "name": "limit",
         "in": "query",
-        "description": "Number of flights per page.",
+        "description": "Number of flights per page",
         "required": false,
         "schema": {
           "type": "integer",
@@ -702,7 +1427,7 @@
       "PageLimit":{
         "name": "page",
         "in": "query",
-        "description": "Page number.",
+        "description": "Page number",
         "required": false,
         "schema": {
           "type": "integer",
@@ -712,7 +1437,7 @@
       "Token": {
         "name": "token",
         "in": "query",
-        "description": "The Token code.",
+        "description": "The Token code",
         "required": true,
         "schema": {
           "type": "string"
@@ -721,13 +1446,23 @@
       "Id": {
         "name": "id",
         "in": "path",
-        "description": "ID of the flight.",
+        "description": "ID",
         "required": true,
         "schema": {
           "type": "integer"
         }
+      },
+      "Email": {
+        "name": "email",
+        "in": "query",
+        "description": "Email",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
       }
     },
+
     "schemas": {
       "User": {
         "type": "object",
@@ -855,17 +1590,7 @@
           "duration": {
             "type": "string"
           }
-        },
-        "required": [
-          "airlinesId",
-          "airportId",
-          "originCityId",
-          "destinationCityId",
-          "departure",
-          "price",
-          "capacity",
-          "class"
-        ]
+        }
       },
       "FlightResponse": {
         "type": "object",
@@ -981,6 +1706,12 @@
             "items": {
               "$ref": "#/components/schemas/Passenger"
             }
+          },
+          "token": {
+            "type": "string"
+          },
+          "redirect_url": {
+            "type": "string"
           }
         }
       },
@@ -1027,6 +1758,32 @@
                 "seatId": {
                   "type": "integer"
                 }
+              }
+            }
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phoneNumber": {
+                "type": "string"
+              },
+              "googleId": {
+                "type": "string"
+              },
+              "password": {
+                "type": "string"
+              },
+              "isActive": {
+                "type": "boolean"
               }
             }
           }
@@ -1194,6 +1951,24 @@
             "type": "object",
             "properties": {
             }
+          }
+        }
+      },
+      "500": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "example": 500
+          },
+          "message": {
+            "type": "string",
+            "example": "Internal Server Error"
+          },
+          "data": {
+            "type": "object",
+            "nullable": true,
+            "example": null
           }
         }
       }
