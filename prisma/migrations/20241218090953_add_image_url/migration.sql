@@ -5,4 +5,4 @@
 
 */
 -- AlterTable
-ALTER TABLE "notification" DROP COLUMN "type";
+ALTER TABLE "notification" DROP COLUMN "name";

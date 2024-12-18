@@ -2,31 +2,46 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient()
 
 const createNotification = async (req, res) => {
-    const { userId, name, detail } = req.body
+    const { userId, type, title, detail } = req.body
+    const userIdNumber = Number(userId);
     try {
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userIdNumber
+            }
+        })
+
+        if (!user) {
+            return res.status(404).json({
+                status: 404,
+                message: 'User not found',
+            });
+        }
+
         const notification = await prisma.notification.create({
             data: {
-                userId,
-                name,
+                userIdNumber,
+                type,
+                title,
                 detail
             }
         });
 
         return res.status(201).json({
             status: 201,
-            message: 'Resource created successfully',
+            message: 'Notification created successfully',
             data: notification,
         });
     } catch (error) {
         return res.status(500).json({
             status: 500,
-            message: 'Error creating resource',
+            message: 'Error creating notification',
             error: error.message,
         })
     }
 }
 
-const getNotificationByUserId = async (req, res) => {
+const getAllNotificationByUserId = async (req, res) => {
     const { userId } = req.params
     const userIdNumber = Number(userId);
     try {
@@ -36,18 +51,26 @@ const getNotificationByUserId = async (req, res) => {
             }
         });
 
-        const unRead = await prisma.notification.count({
-            where: {
-                userId: userIdNumber,
-                isRead: false
-            }
-        })
+        if (!notifications || notifications.length === 0) {
+            return res.status(404).json({
+                status: 404,
+                message: 'Notifications not found',
+            });
+        }
+
+        const allNotifications = notifications.length
+        const readNotifications = notifications.filter(notification => notification.isRead).length
+        const unreadNotifications = notifications.filter(notification => !notification.isRead).length
 
         return res.status(200).json({
             status: 200,
             message: 'Notifications retrieved successfully',
-            unread: unRead,
-            data: notifications,
+            data: {
+                all: allNotifications,
+                read: readNotifications,
+                unread: unreadNotifications,
+                notifications
+            },
         });
     } catch (error) {
         return res.status(500).json({
@@ -114,22 +137,47 @@ const deleteNotificationByUserId = async (req, res) => {
     }
 }
 
-const getAllNotification = async (req, res) => {
+const filterNotification = async (req, res) => {
+    const { userId } = req.params;
+    const { isread } = req.query
+    const userIdNumber = Number(userId);
+    if (!userId || isread === undefined) {
+        return res.status(400).json({
+            status: 400,
+            message: 'UserId and isread filter are required',
+        });
+    }
+
+    const isReadBoolean = isread === 'true';
+
     try {
-        const notifications = await prisma.notification.findMany();
+        const notifications = await prisma.notification.findMany({
+            where: {
+                userId: userIdNumber,
+                isRead: isReadBoolean,
+            }
+        });
+
+        if (!notifications || notifications.length === 0) {
+            return res.status(404).json({
+                status: 404,
+                message: 'Notifications not found',
+            });
+        }
+
         return res.status(200).json({
             status: 200,
             message: 'Notifications retrieved successfully',
             data: notifications,
         });
+
     } catch (error) {
         return res.status(500).json({
             status: 500,
-            message: 'Error retrieving notifications',
+            message: 'Error filtering notifications',
             error: error.message,
         });
     }
-}
+};
 
-
-module.exports = { createNotification, getNotificationByUserId, updateNotification, deleteNotificationByUserId, getAllNotification }
+module.exports = { createNotification, getAllNotificationByUserId, updateNotification, deleteNotificationByUserId, filterNotification }

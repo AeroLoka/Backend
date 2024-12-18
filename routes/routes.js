@@ -36,10 +36,10 @@ const { admin } = require('../middleware/admin');
 
 const {
   createNotification,
-  getNotificationByUserId,
+  getAllNotificationByUserId,
   updateNotification,
   deleteNotificationByUserId,
-  getAllNotification
+  filterNotification
 } = require('../controllers/notificationControllers');
 
 
@@ -70,11 +70,11 @@ routes.post('/api/login', login);
 routes.post('/api/forget-password', sendEmailForgetPassword);
 routes.post('/api/reset-password', resetPassword);
 
+routes.get('/api/notifications/:userId', filterNotification);
+routes.get('/api/notifications/:userId', getAllNotificationByUserId);
 routes.post('/api/notifications/:userId', createNotification);
-routes.get('/api/notifications/:userId', getNotificationByUserId);
 routes.put('/api/notifications/:id', updateNotification);
 routes.delete('/api/notifications/:userId', deleteNotificationByUserId);
-routes.get('/api/notifications/', getAllNotification);
 
 routes.get(
   '/api/google',

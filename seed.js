@@ -117,77 +117,77 @@ async function main() {
     data: [
       {
         userId: 1,
-        name: "Reminder 1",
+        title: "Reminder 1",
         detail: "Your flight is scheduled on 2025-01-04 at 07:30 AM.",
       },
       {
         userId: 2,
-        name: "Reminder 2",
+        title: "Reminder 2",
         detail: "Your flight is scheduled on 2025-02-01 at 10:00 AM.",
       },
       {
         userId: 3,
-        name: "Reminder 3",
+        title: "Reminder 3",
         detail: "Your flight is scheduled on 2025-03 at 09:00 AM.",
       },
       {
         userId: 4,
-        name: "Reminder 4",
+        title: "Reminder 4",
         detail: "Your flight is scheduled on 2025-04-01 at 13:00 AM.",
       },
       {
         userId: 5,
-        name: "Reminder 5",
+        title: "Reminder 5",
         detail: "Your flight is scheduled on 2025-05-20 at 05:30 AM.",
       },
       {
         userId: 6,
-        name: "Reminder 6",
+        title: "Reminder 6",
         detail: "Your flight is scheduled on 2025-06-15 at 11:45 AM.",
       },
       {
         userId: 7,
-        name: "Reminder 7",
+        title: "Reminder 7",
         detail: "Your flight is scheduled on 2025-07-10 at 08:15 AM.",
       },
       {
         userId: 8,
-        name: "Reminder 8",
+        title: "Reminder 8",
         detail: "Your flight is scheduled on 2025-08-05 at 14:00 PM.",
       },
       {
         userId: 9,
-        name: "Reminder 9",
+        title: "Reminder 9",
         detail: "Your flight is scheduled on 2025-09-22 at 06:30 AM.",
       },
       {
         userId: 10,
-        name: "Reminder 10",
+        title: "Reminder 10",
         detail: "Your flight is scheduled on 2025-10-01 at 09:45 AM.",
       },
       {
         userId: 11,
-        name: "Reminder 11",
+        title: "Reminder 11",
         detail: "Your flight is scheduled on 2025-11-18 at 07:00 AM.",
       },
       {
         userId: 12,
-        name: "Reminder 12",
+        title: "Reminder 12",
         detail: "Your flight is scheduled on 2025-12-25 at 16:30 PM.",
       },
       {
         userId: 13,
-        name: "Reminder 13",
+        title: "Reminder 13",
         detail: "Your flight is scheduled on 2026-01-03 at 12:00 PM.",
       },
       {
         userId: 14,
-        name: "Reminder 14",
+        title: "Reminder 14",
         detail: "Your flight is scheduled on 2026-02-09 at 10:15 AM.",
       },
       {
         userId: 15,
-        name: "Reminder 15",
+        title: "Reminder 15",
         detail: "Your flight is scheduled on 2026-03-12 at 18:00 PM.",
       },
     ],
@@ -337,7 +337,7 @@ async function main() {
       {
         airlinesId: 1,
         airportId: 1,
-        departure: new Date("2025-01-04T07:30:00Z"), 
+        departure: new Date("2025-01-04T07:30:00Z"),
         return: new Date("2025-01-04T12:00:00Z"),
         price: 1000000.0,
         capacity: 180,
@@ -350,7 +350,7 @@ async function main() {
       {
         airlinesId: 2,
         airportId: 2,
-        departure: new Date("2025-02-01T10:00:00Z"), 
+        departure: new Date("2025-02-01T10:00:00Z"),
         return: new Date("2025-02-01T14:30:00Z"),
         price: 2000000.0,
         capacity: 150,
@@ -363,7 +363,7 @@ async function main() {
       {
         airlinesId: 3,
         airportId: 3,
-        departure: new Date("2025-03-01T09:00:00Z"), 
+        departure: new Date("2025-03-01T09:00:00Z"),
         return: new Date("2025-03-01T14:00:00Z"),
         price: 1250000.0,
         capacity: 160,
@@ -376,7 +376,7 @@ async function main() {
       {
         airlinesId: 4,
         airportId: 4,
-        departure: new Date("2025-04-01T13:00:00Z"), 
+        departure: new Date("2025-04-01T13:00:00Z"),
         return: new Date("2025-04-01T18:30:00Z"),
         price: 2500000.0,
         capacity: 200,
@@ -389,7 +389,7 @@ async function main() {
       {
         airlinesId: 5,
         airportId: 5,
-        departure: new Date("2025-05-20T05:30:00Z"), 
+        departure: new Date("2025-05-20T05:30:00Z"),
         return: new Date("2025-05-20T09:30:00Z"),
         price: 1000000.0,
         capacity: 100,
