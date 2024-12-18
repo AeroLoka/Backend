@@ -37,9 +37,8 @@ enum userRole {
 model Notification {
   id        Int      @id @default(autoincrement())
   userId    Int
-  name      String
   type      String   @default("notifikasi")
-  title     String
+  title     String   @default("untitled")
   detail    String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
