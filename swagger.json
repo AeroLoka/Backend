@@ -368,6 +368,81 @@
     },
 
     "/api/booking": {
+      "get": {
+        "tags": ["Bookings"],
+        "summary": "Get booking by Booking Code",
+        "description": "Retrieve a single booking by its Booking Code",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BookingCode"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBookingsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid booking code",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Booking code is required",
+                  "data": null
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Booking not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "Booking not found",
+                  "data": null
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
+          }
+        }
+          
+      },
       "post": {
         "tags": ["Bookings"],
         "summary": "Create a booking",
@@ -586,10 +661,101 @@
         "description": "Retrieve a list of flights based on search criteria",
         "parameters": [
           {
-            "$ref": "#/components/parameters/Criteria"
+            "name": "from",
+            "in": "query",
+            "description": "Kota asal penerbangan",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "$ref": "#/components/parameters/Value"
+            "name": "to",
+            "in": "query",
+            "description": "Kota tujuan penerbangan",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "departureDateStart",
+            "in": "query",
+            "description": "Tanggal keberangkatan awal (format: YYYY-MM-DD)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "departureDateEnd",
+            "in": "query",
+            "description": "Tanggal keberangkatan akhir (format: YYYY-MM-DD)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "returnDateStart",
+            "in": "query",
+            "description": "Tanggal kembali awal (format: YYYY-MM-DD)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "returnDateEnd",
+            "in": "query",
+            "description": "Tanggal kembali akhir (format: YYYY-MM-DD)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "adultPassengers",
+            "in": "query",
+            "description": "Jumlah penumpang dewasa",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "childPassengers",
+            "in": "query",
+            "description": "Jumlah penumpang anak-anak",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "example": 0
+            }
+          },
+          {
+            "name": "infantPassengers",
+            "in": "query",
+            "description": "Jumlah penumpang bayi",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "example": 0
+            }
+          },
+          {
+            "name": "seatClass",
+            "in": "query",
+            "description": "Kelas tempat duduk (contoh: Economy, Business, First)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           },
           {
             "$ref": "#/components/parameters/Filter"
@@ -601,7 +767,95 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Flight"
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "airlinesId": {
+                      "type": "integer"
+                    },
+                    "airportId": {
+                      "type": "integer"
+                    },
+                    "originCityId": {
+                      "type": "integer"
+                    },
+                    "destinationCityId": {
+                      "type": "integer"
+                    },
+                    "departure": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "return": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "price": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "capacity": {
+                      "type": "integer"
+                    },
+                    "class": {
+                      "type": "string"
+                    },
+                    "information": {
+                      "type": "string"
+                    },
+                    "duration": {
+                      "type": "integer"
+                    },
+                    "originCity": {
+                      "$ref": "#/components/schemas/OriginCity"
+                    },
+                    "destinationCity": {
+                      "$ref": "#/components/schemas/DestinationCity"
+                    },
+                    "airlines": {
+                      "$ref": "#/components/schemas/Airline"
+                    },
+                    "airport": {
+                      "$ref": "#/components/schemas/Airport"
+                    },
+                    "bookings": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "userId": {
+                          "type": "integer"
+                        },
+                        "flightId": {
+                          "type": "integer"
+                        },
+                        "bookingDate": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "totalPrice": {
+                          "type": "number",
+                          "format": "float"
+                        },
+                        "totalPassenger": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "bookingCode": {
+                          "type": "string"
+                        },
+                        "snap_token": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                  
                 }
               }
             }
@@ -615,7 +869,8 @@
                     "summary": "Invalid criteria",
                     "value": {
                       "status": 400,
-                      "message": "Invalid criteria",
+                      "success": false,
+                      "message": "Error message",
                       "data": null
                     }
                   },
@@ -623,6 +878,7 @@
                     "summary": "Invalid filter",
                     "value": {
                       "status": 400,
+                      "success": false,
                       "message": "Invalid filter",
                       "data": null
                     }
@@ -637,7 +893,8 @@
               "application/json": {
                 "example": {
                   "status": 404,
-                  "message": "No flights found matching the criteria or filter",
+                  "success": false,
+                  "message": "Maaf, Penerbangan tidak ditemukan",
                   "data": null
                 }
               }
@@ -1363,7 +1620,89 @@
           }
         }
       }
+    },
+
+    "/api/seats/{flightId}": {
+      "get": {
+        "tags": ["Seat"],
+        "summary": "Get seats by flight ID",
+        "description": "Get seats by flight ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/FlightId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSeatResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Seat not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "seat not found",
+                  "data": null
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error retrieving seats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/api/notifications/{userId}": {
+      "get":{
+        "tags": ["Notification"],
+        "summary": "Get notifications by user ID",
+        "description": "Get notifications by user ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error retrieving notifications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
+          }
+        }
+      }
     }
+  
   },
 
   "components": {
@@ -1376,21 +1715,11 @@
     },
 
     "parameters": {
-      "Criteria": {
-        "name": "criteria",
-        "in": "query",
-        "description": "The search criterion to filter flights",
-        "required": false,
-        "schema": {
-          "type": "string",
-          "enum": ["benua", "kelas", "kota", "negara"]
-        }
-      },
       "Filter": {
-        "name": "filter",
+        "name": "sortBy",
         "in": "query",
         "description": "The filter to apply to the flights",
-        "required": true,
+        "required": false,
         "schema": {
           "type": "string",
           "enum": [
@@ -1403,15 +1732,6 @@
             "kedatangan-paling-awal",
             "kedatangan-paling-akhir"
           ]
-        }
-      },
-      "Value": {
-        "name": "value",
-        "in": "query",
-        "description": "The value to filter the flights",
-        "required": false,
-        "schema": {
-          "type": "string"
         }
       },
       "Page": {
@@ -1452,10 +1772,37 @@
           "type": "integer"
         }
       },
+      "FlightId": {
+        "name": "flightId",
+        "in": "path",
+        "description": "Flight ID",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "UserId": {
+        "name": "userId",
+        "in": "path",
+        "description": "User ID",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        }
+      }, 
       "Email": {
         "name": "email",
         "in": "query",
         "description": "Email",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "BookingCode": {
+        "name": "bookingCode",
+        "in": "query",
+        "description": "Booking Code",
         "required": true,
         "schema": {
           "type": "string"
@@ -1738,8 +2085,17 @@
           "totalPassenger": {
             "type": "integer"
           },
+          "status": {
+            "type": "string"
+          },
+          "bookingCode": {
+            "type": "string"
+          },
+          "snap_token": {
+            "type": "string"
+          },
           "flight": {
-            "$ref": "#/components/schemas/Flight"
+            "$ref": "#/components/schemas/GetFlightResponse"
           },
           "passengers": {
             "type": "array",
@@ -1757,33 +2113,30 @@
                 },
                 "seatId": {
                   "type": "integer"
+                },
+                "passenger": {
+                  "$ref": "#/components/schemas/Passenger"
+                },
+                "seat": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "flightId": {
+                      "type": "integer"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "seatNumber": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "integer"
+                    }
+                  }
                 }
-              }
-            }
-          },
-          "user": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "integer"
-              },
-              "name": {
-                "type": "string"
-              },
-              "email": {
-                "type": "string"
-              },
-              "phoneNumber": {
-                "type": "string"
-              },
-              "googleId": {
-                "type": "string"
-              },
-              "password": {
-                "type": "string"
-              },
-              "isActive": {
-                "type": "boolean"
               }
             }
           }
@@ -1805,17 +2158,66 @@
           "nationality": {
             "type": "string"
           },
+          "ktpNumber": {
+            "type": "string"
+          },
           "passportNumber": {
+            "type": "string"
+          },
+          "passportCountry": {
             "type": "string"
           },
           "passportExpiry": {
             "type": "string",
-            "format": "date"
+            "format": "date-time"
           }
         }
       },
       "Seat": {
             "type": "string"
+      },
+      "GetSeatResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "flightId": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "seatNumber": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "bookingPassengers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "bookingId": {
+                  "type": "integer"
+                },
+                "passengersId": {
+                  "type": "integer"
+                },
+                "seatId": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "flight": {
+            "$ref": "#/components/schemas/Flight"
+          }
+        }
       },
       "Register": {
         "type": "object",
