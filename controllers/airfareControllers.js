@@ -1,31 +1,17 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-
+const imageKit = require("../middleware/imageKit");
 const flightSchema = require("../validations/flightValidations");
 
 const getAllFlights = async (req, res) => {
-  const { limit = 10, page = 1, continent } = req.query;
-  const take = Number.isInteger(parseInt(limit)) ? parseInt(limit) : 10;
-  const skip = Number.isInteger(parseInt(page)) ? (parseInt(page) - 1) * take : 0;
+  const { limit = 10, page = 1 } = req.query;
+  const take = parseInt(limit);
+  const skip = (parseInt(page) - 1) * take;
 
   try {
-    let whereCondition = {};
-
-    if (continent && continent !== 'semua') {
-      whereCondition = {
-        airport: {
-          continent: {
-            equals: continent.toLowerCase(),
-            mode: 'insensitive',
-          },
-        },
-      };
-    }
-
     const flights = await prisma.flight.findMany({
       skip,
       take,
-      where: whereCondition,
       include: {
         airlines: true,
         airport: true,
@@ -34,9 +20,7 @@ const getAllFlights = async (req, res) => {
       },
     });
 
-    const totalFlights = await prisma.flight.count({
-      where: whereCondition,
-    });
+    const totalFlights = await prisma.flight.count();
 
     if (flights.length === 0) {
       return res.status(404).json({
@@ -112,18 +96,22 @@ const getFlightById = async (req, res) => {
 };
 
 const createFlight = async (req, res) => {
+  console.log(req.body);
+  console.log(req.file, ">>>>>>====");
+
   // Validasi request body untuk flight
-  const { error } = flightSchema.validate(req.body);
-  if (error) {
-    return res.status(400).json({
-      status: 400,
-      message: error.details[0].message,
-      data: null,
-    });
-  }
+  // console.log(req);
+  // const { error } = flightSchema.validate(req.body);
+  // if (error) {
+  //   console.log("masuk error");
+  //   return res.status(400).json({
+  //     status: 400,
+  //     message: error.details[0].message,
+  //     data: null,
+  //   });
+  // }
 
   try {
-    // 1. Validasi file upload (cek keberadaan file)
     if (!req.file || req.file.size === 0) {
       return res.status(400).json({
         status: 400,
@@ -131,60 +119,51 @@ const createFlight = async (req, res) => {
         data: null,
       });
     }
-
-    // 2. Konversi file buffer ke base64
     let stringFile = req.file.buffer.toString("base64");
+    // console.log(stringFile, "ini string file");
     const fileName = req.body.judul || req.file.originalname;
+    // console.log(stringFile, "ini file name");
 
+    // console.log(stringFile, fileName, ">>>> INI CHECHKING");
     // 3. Upload ke ImageKit
     const uploadImage = await imageKit.upload({
       fileName: fileName,
       file: stringFile,
     });
-
     console.log(uploadImage, "===> INI uploadImage");
-
-    // 4. Simpan informasi image ke database Prisma
-    const resultImage = await prisma.image.create({
-      data: {
-        judul: fileName,
-        imageUrl: uploadImage.url,
-        fileId: uploadImage.fileId,
-        deskripsi: req.body.deskripsi || "deskripsi tempelan", // Default deskripsi jika kosong
-      },
+    const data4 = {
+      judul: fileName,
+      imageUrl: uploadImage.url,
+      fileId: uploadImage.fileId,
+      deskripsi: req.body.deskripsi || "deskripsi tempelan",
+    };
+    const data3 = {
+      airlinesId: +req.body.airlinesId,
+      airportId: +req.body.airportId,
+      originCityId: +req.body.originCityId,
+      destinationCityId: +req.body.destinationCityId,
+      departure: new Date(req.body.departure),
+      return: new Date(req.body.return),
+      price: +req.body.price,
+      capacity: +req.body.capacity,
+      class: req.body.class,
+      information: req.body.information,
+      duration: +req.body.duration,
+      imageUrl: uploadImage.url,
+    };
+    const pesawat = await prisma.flight.create({
+      data: data3,
     });
+    // console.log(data3, "ini dari data3");
 
-    console.log(resultImage, "===> INI resultImage");
-
-    // 5. Simpan data flight ke database Prisma
-    const flight = await prisma.flight.create({
-      data: {
-        airlinesId: req.body.airlinesId,
-        airportId: req.body.airportId,
-        originCityId: req.body.originCityId,
-        destinationCityId: req.body.destinationCityId,
-        departure: new Date(req.body.departure),
-        return: new Date(req.body.return),
-        price: req.body.price,
-        capacity: req.body.capacity,
-        class: req.body.class,
-        information: req.body.information,
-        duration: req.body.duration,
-        imageId: resultImage.id, // Relasi ke tabel image jika ada kolom imageId
-      },
-    });
-
-    // 6. Response sukses
+    console.log(pesawat, "ini pesawat");
+    // console.log(data3, "ini dari pesawat");
+    // // 6. Response sukses
     return res.status(201).json({
       status: 201,
       message: "Resource created successfully",
       data: {
-        flight,
-        image: {
-          imagekitName: uploadImage.name,
-          fileId: uploadImage.fileId,
-          imageUrl: uploadImage.url,
-        },
+        data3,
       },
     });
   } catch (error) {
@@ -218,21 +197,24 @@ const updateFlight = async (req, res) => {
         data: null,
       });
     }
-
+    // const data4 = {
+    //   imageUrl: uploadImage.url,
+    // };
     const flight = await prisma.flight.update({
       where: { id: flightId },
       data: {
-        airlinesId: req.body.airlinesId,
-        airportId: req.body.airportId,
-        originCityId: req.body.originCityId,
-        destinationCityId: req.body.destinationCityId,
+        airlinesId: +req.body.airlinesId,
+        airportId: +req.body.airportId,
+        originCityId: +req.body.originCityId,
+        destinationCityId: +req.body.destinationCityId,
         departure: new Date(req.body.departure),
         return: new Date(req.body.return),
-        price: req.body.price,
-        capacity: req.body.capacity,
+        price: +req.body.price,
+        capacity: +req.body.capacity,
         class: req.body.class,
         information: req.body.information,
-        duration: req.body.duration,
+        duration: +req.body.duration,
+        // imageUrl: uploadImage.url,
       },
     });
 

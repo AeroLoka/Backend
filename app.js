@@ -2,7 +2,6 @@ const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const multer = require("./middleware/multer");
 
 if (process.env.NODE_ENV !== "production") {
   dotenv.config();
