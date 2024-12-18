@@ -181,7 +181,13 @@ const getBookingByBookingCode = async (req, res) => {
     const booking = await prisma.booking.findUnique({
       where: { bookingCode },
       include: {
-        flight: true,
+        flight: {
+          include: {
+            airport: true,
+            destinationCity: true,
+            originCity: true,
+          },
+        },
         passengers: {
           include: {
             passenger: true,
@@ -282,9 +288,19 @@ const getAllBookingsByUserId = async (req, res) => {
     const bookings = await prisma.booking.findMany({
       where: filters,
       include: {
-        flight: true,
-        passengers: true,
-        user: true,
+        flight: {
+          include: {
+            airport: true,
+            destinationCity: true,
+            originCity: true,
+          },
+        },
+        passengers: {
+          include: {
+            passenger: true,
+            seat: true,
+          },
+        },
       },
     });
 
