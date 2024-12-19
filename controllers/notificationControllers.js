@@ -58,20 +58,56 @@ const getAllNotificationByUserId = async (req, res) => {
             });
         }
 
-        const allNotifications = notifications.length
-        const readNotifications = notifications.filter(notification => notification.isRead).length
-        const unreadNotifications = notifications.filter(notification => !notification.isRead).length
+        const notificationsWithoutUserId = notifications.map(notification => {
+            const { userId, ...rest } = notification;
+            return rest;
+        });
+
+        return res.status(200).json({
+            status: 200,
+            message: 'Notifications retrieved successfully',
+            data: notificationsWithoutUserId,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            message: 'Error retrieving notifications',
+            error: error.message,
+        });
+    }
+}
+
+const getCountNotificationByUserId = async (req, res) => {
+    const { userId } = req.params
+    const userIdNumber = Number(userId);
+    try {
+        const count = await prisma.notification.findMany({
+            where: {
+                userId: userIdNumber
+            }
+        });
+
+        if (!count || count.length === 0) {
+            return res.status(404).json({
+                status: 404,
+                message: 'Notifications not found',
+            });
+        }
+
+        const allNotifications = count.length
+        const readNotifications = count.filter(notification => notification.isRead).length
+        const unreadNotifications = count.filter(notification => !notification.isRead).length
 
         return res.status(200).json({
             status: 200,
             message: 'Notifications retrieved successfully',
             data: {
-                all: allNotifications,
-                read: readNotifications,
-                unread: unreadNotifications,
-                notifications
+                allCount: allNotifications,
+                readCount: readNotifications,
+                unreadCount: unreadNotifications
             },
         });
+
     } catch (error) {
         return res.status(500).json({
             status: 500,
@@ -165,10 +201,15 @@ const filterNotification = async (req, res) => {
             });
         }
 
+        const notificationsWithoutUserId = notifications.map(notification => {
+            const { userId, ...rest } = notification;
+            return rest;
+        });
+
         return res.status(200).json({
             status: 200,
             message: 'Notifications retrieved successfully',
-            data: notifications,
+            data: notificationsWithoutUserId,
         });
 
     } catch (error) {
@@ -180,4 +221,4 @@ const filterNotification = async (req, res) => {
     }
 };
 
-module.exports = { createNotification, getAllNotificationByUserId, updateNotification, deleteNotificationByUserId, filterNotification }
+module.exports = { createNotification, getAllNotificationByUserId, getCountNotificationByUserId, updateNotification, deleteNotificationByUserId, filterNotification }
