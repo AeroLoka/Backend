@@ -58,8 +58,20 @@ routes.get("/api/search-flights", getFlights);
 routes.get("/api/flights/", getAllFlights);
 routes.get("/api/flights/:id", getFlightById);
 
-routes.post("/api/flights/", upload.single("imageUrl"), createFlight);
-routes.put("/api/flights/:id", upload.single("imageUrl"), updateFlight);
+routes.post(
+  "/api/flights/",
+  restrict,
+  admin,
+  upload.single("imageUrl"),
+  createFlight
+);
+routes.put(
+  "/api/flights/:id",
+  restrict,
+  admin,
+  upload.single("imageUrl"),
+  updateFlight
+);
 routes.delete("/api/flights/:id", restrict, admin, deleteFlight);
 
 routes.get("/api/seats/:flightId", getAllSeatByFlightId);
