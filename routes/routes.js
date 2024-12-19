@@ -71,12 +71,12 @@ routes.post('/api/login', login);
 routes.post('/api/forget-password', sendEmailForgetPassword);
 routes.post('/api/reset-password', resetPassword);
 
-routes.post('/api/notifications/:userId', createNotification);
-routes.get('/api/notifications/:userId', getAllNotificationByUserId);
-routes.get('/api/notifications/count/:userId', getCountNotificationByUserId);
-routes.get('/api/notifications/filter/:userId', filterNotification);
-routes.put('/api/notifications/:id', updateNotification);
-routes.delete('/api/notifications/:userId', deleteNotificationByUserId);
+routes.post('/api/notifications', restrict, createNotification);
+routes.get('/api/notifications/:userId', restrict, getAllNotificationByUserId);
+routes.get('/api/notifications/count/:userId', restrict, getCountNotificationByUserId);
+routes.get('/api/notifications/filter/:userId', restrict, filterNotification);
+routes.put('/api/notifications/read/:notificationId', restrict, updateNotification);
+routes.delete('/api/notifications/:userId', restrict, deleteNotificationByUserId);
 
 routes.get(
   '/api/google',
