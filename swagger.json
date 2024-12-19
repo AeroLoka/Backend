@@ -1669,6 +1669,58 @@
       }
     },
 
+    "/api/notifications": {
+      "post" :{
+        "summary": "Create Notification",
+        "tags": ["Notification"],
+        "description": "Create Notification",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Notification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Notification created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostNotificationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "User not found",
+                  "data": null
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error creating notification",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
     "/api/notifications/{userId}": {
       "get":{
         "tags": ["Notification"],
@@ -1681,10 +1733,136 @@
         ],
         "responses": {
           "200": {
-            "description": "Data retrieved successfully",
+            "description": "Notification retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
+                  "$ref": "#/components/schemas/GetAllNotificationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Notification not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "Notifications not found",
+                  "data": null
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error retrieving notifications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Notification"],
+        "summary": "Delete notifications by user ID",
+        "description": "Delete all read notifications for a specific user ID.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notifications deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 200,
+                  "message": "Notifications deleted successfully",
+                  "deletedCount": 2
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user ID",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Invalid user ID"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "No read notifications found for the specified user ID"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error deleting notifications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
+          }
+        } 
+      }
+    },
+
+    "/api/notifications/count/{userId}": {
+      "get": {
+        "tags": ["Notification"],
+        "summary": "Get count of notifications by user ID",
+        "description": "Get count of notifications by user ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification count retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCountNotificationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user ID",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Invalid user ID"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Notification not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "Notifications not found"
                 }
               }
             }
@@ -1701,7 +1879,127 @@
           }
         }
       }
+    },
+
+    "/api/notifications/filter/{userId}": {
+      "get": {
+        "tags": ["Notification"],
+        "summary": "Filtered notifications by user ID",
+        "description": "Get user notifications filtered by read or unread status.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          },
+          {
+            "$ref": "#/components/parameters/NotificationFilter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Filtered notifications retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllNotificationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Invalid user ID": {
+                    "summary": "Invalid user ID",
+                    "value": {
+                      "status": 400,
+                      "message": "Invalid user ID"
+                    }
+                  },
+                  "Required filter parameter": {
+                    "summary": "Required filter parameter",
+                    "value": {
+                      "status": 400,
+                      "message": "Required filter parameter"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Notifications not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "Notifications not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error retrieving notifications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/api/notifications/read/{notificationId}": {
+      "put": {
+        "tags": ["Notification"],
+        "summary": "Update notifications by user ID",
+        "description": "Update notifications by user ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/NotificationId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 200,
+                  "message": "Notification updated successfully",
+                  "data": null
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid notification ID",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Invalid notification ID"                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error updating notification",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
+          }
+        }
+      }
     }
+    
   
   },
 
@@ -1789,7 +2087,30 @@
         "schema": {
           "type": "integer"
         }
-      }, 
+      },
+      "NotificationId": {
+        "name": "notificationId",
+        "in": "path",
+        "description": "Notification ID",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "NotificationFilter": {
+        "name": "isread",
+        "in": "query",
+        "description": "The filter to apply to the notifications",
+        "required": true,
+        "schema": {
+          "type": "boolean",
+          "enum": [
+            "true",
+            "false"
+          ]
+          
+        }
+      },
       "Email": {
         "name": "email",
         "in": "query",
@@ -2353,6 +2674,88 @@
             "type": "object",
             "properties": {
             }
+          }
+        }
+      },
+      "Notification": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          }
+        } 
+      },
+      "PostNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "userId": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "isRead": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "GetAllNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "isRead": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "GetCountNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "allCount": {
+            "type": "integer"
+          },
+          "readCount": {
+            "type": "integer"
+          },
+          "unreadCount": {
+            "type": "integer"
           }
         }
       },
