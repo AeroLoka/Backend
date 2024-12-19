@@ -38,7 +38,7 @@ const { admin } = require("../middleware/admin");
 
 const {
   createNotification,
-  getNotificationByUserId,
+  getAllNotificationByUserId,
   updateNotification,
   deleteNotificationByUserId,
   getAllNotification,
