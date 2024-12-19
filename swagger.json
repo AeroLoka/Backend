@@ -1674,6 +1674,11 @@
         "summary": "Create Notification",
         "tags": ["Notification"],
         "description": "Create Notification",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1726,6 +1731,11 @@
         "tags": ["Notification"],
         "summary": "Get notifications by user ID",
         "description": "Get notifications by user ID",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/UserId"
@@ -1770,6 +1780,11 @@
         "tags": ["Notification"],
         "summary": "Delete notifications by user ID",
         "description": "Delete all read notifications for a specific user ID.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/UserId"
@@ -1829,6 +1844,11 @@
         "tags": ["Notification"],
         "summary": "Get count of notifications by user ID",
         "description": "Get count of notifications by user ID",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/UserId"
@@ -1886,6 +1906,11 @@
         "tags": ["Notification"],
         "summary": "Filtered notifications by user ID",
         "description": "Get user notifications filtered by read or unread status.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/UserId"
@@ -1958,6 +1983,11 @@
         "tags": ["Notification"],
         "summary": "Update notifications by user ID",
         "description": "Update notifications by user ID",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/NotificationId"
