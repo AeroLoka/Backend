@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Flight Management API",
-    "version": "100",
+    "version": "1.0.0",
     "description": "API documentation for managing flights"
   },
 
