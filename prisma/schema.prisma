@@ -14,24 +14,34 @@ datasource db {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
-  name          String
-  email         String         @unique
-  phoneNumber   String         @unique
-  googleId      String?        @unique
-  password      String
-  isActive      Boolean        @default(false)
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String   @unique
+  phoneNumber String
+  googleId    String?  @unique
+  password    String
+  isActive    Boolean  @default(false)
+  role        userRole @default(user)
+
   bookings      Booking[]
   notifications Notification[]
 
   @@map("user")
 }
 
+enum userRole {
+  admin
+  user
+}
+
 model Notification {
-  id     Int    @id @default(autoincrement())
-  userId Int
-  name   String
-  detail String
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  type      String   @default("notifikasi")
+  title     String   @default("untitled")
+  detail    String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
 
@@ -72,6 +82,7 @@ model Flight {
   class             String
   information       String
   duration          Int
+  imageUrl          String
 
   airlines        Airlines  @relation(fields: [airlinesId], references: [id])
   airport         Airports  @relation(fields: [airportId], references: [id])
@@ -79,7 +90,7 @@ model Flight {
   destinationCity City      @relation("FlightDestinationCity", fields: [destinationCityId], references: [id])
   seats           Seat[]
   bookings        Booking[]
-
+ 
   @@map("flight")
 }
 
@@ -99,6 +110,7 @@ model Seat {
   flightId   Int
   status     SeatStatus @default(available)
   seatNumber String
+  version    Int        @default(1)
 
   flight           Flight             @relation(fields: [flightId], references: [id])
   BookingPassenger BookingPassenger[]
@@ -120,6 +132,7 @@ model Booking {
   totalPassenger Int
   status         bookingStatus @default(unpaid)
   bookingCode    String        @unique
+  snap_token     String?
 
   user       User               @relation(fields: [userId], references: [id])
   flight     Flight             @relation(fields: [flightId], references: [id])
@@ -148,14 +161,16 @@ model BookingPassenger {
 }
 
 model Passenger {
-  id             Int                @id @default(autoincrement())
-  firstName      String
-  lastName       String
-  birthDate      DateTime
-  nationality    String
-  passportNumber String
-  passportExpiry DateTime
-  bookings       BookingPassenger[]
+  id              Int                @id @default(autoincrement())
+  firstName       String
+  lastName        String?
+  birthDate       DateTime
+  nationality     String
+  ktpNumber       String?
+  passportNumber  String?
+  passportCountry String?
+  passportExpiry  DateTime?
+  bookings        BookingPassenger[]
 
   @@map("passenger")
 }
