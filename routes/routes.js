@@ -83,9 +83,10 @@ routes.post("/api/login", login);
 routes.post("/api/forget-password", sendEmailForgetPassword);
 routes.post("/api/reset-password", resetPassword);
 
-routes.get("/api/notifications/:userId", filterNotification);
-routes.get("/api/notifications/:userId", getAllNotificationByUserId);
 routes.post("/api/notifications/:userId", createNotification);
+routes.get("/api/notifications/:userId", getAllNotificationByUserId);
+routes.get("/api/notifications/count/:userId", getCountNotificationByUserId);
+routes.get("/api/notifications/filter/:userId", filterNotification);
 routes.put("/api/notifications/:id", updateNotification);
 routes.delete("/api/notifications/:userId", deleteNotificationByUserId);
 

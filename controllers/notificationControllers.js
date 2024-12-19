@@ -20,7 +20,7 @@ const createNotification = async (req, res) => {
 
         const notification = await prisma.notification.create({
             data: {
-                userIdNumber,
+                userId: userIdNumber,
                 type,
                 title,
                 detail
@@ -80,6 +80,14 @@ const getAllNotificationByUserId = async (req, res) => {
 const getCountNotificationByUserId = async (req, res) => {
     const { userId } = req.params
     const userIdNumber = Number(userId);
+
+    if (isNaN(userIdNumber)) {
+        return res.status(400).json({
+            status: 400,
+            message: 'Invalid user ID',
+        });
+    }
+
     try {
         const count = await prisma.notification.findMany({
             where: {
@@ -118,8 +126,16 @@ const getCountNotificationByUserId = async (req, res) => {
 }
 
 const updateNotification = async (req, res) => {
-    const notificationId = req.params
+    const { notificationId } = req.params
     const notificationIdNumber = Number(notificationId);
+
+    if (isNaN(notificationIdNumber)) {
+        return res.status(400).json({
+            status: 400,
+            message: 'Invalid notification ID',
+        });
+    }
+
     try {
         const notification = await prisma.notification.update({
             where: {
@@ -133,7 +149,7 @@ const updateNotification = async (req, res) => {
         return res.status(200).json({
             status: 200,
             message: 'Notification read successfully',
-            data: notification,
+            data: null,
         });
 
     } catch (error) {
@@ -146,22 +162,36 @@ const updateNotification = async (req, res) => {
 }
 
 const deleteNotificationByUserId = async (req, res) => {
-    const userId = req.params
+    const { userId } = req.params
     const userIdNumber = Number(userId);
+
+    if (isNaN(userIdNumber)) {
+        return res.status(400).json({
+            status: 400,
+            message: 'Invalid user ID',
+        });
+    }
+
     try {
-        const notification = await prisma.notification.deleteMany({
+        const deletedNotifications = await prisma.notification.deleteMany({
             where: {
                 userId: userIdNumber,
                 isRead: true
             }
         })
 
+        if (deletedNotifications.count === 0) {
+            return res.status(404).json({
+                status: 404,
+                message: 'No read notifications found for the specified user ID',
+            });
+        }
+
+
         return res.status(200).json({
             status: 200,
             message: 'Notification deleted successfully',
-            data: {
-                count: notification.count
-            },
+            deletedCount: deletedNotifications.count
         })
 
     } catch (error) {
@@ -177,10 +207,18 @@ const filterNotification = async (req, res) => {
     const { userId } = req.params;
     const { isread } = req.query
     const userIdNumber = Number(userId);
+
     if (!userId || isread === undefined) {
         return res.status(400).json({
             status: 400,
             message: 'UserId and isread filter are required',
+        });
+    }
+
+    if (isNaN(userIdNumber)) {
+        return res.status(400).json({
+            status: 400,
+            message: 'Invalid user ID',
         });
     }
 
