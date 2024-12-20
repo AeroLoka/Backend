@@ -64,7 +64,10 @@ const getFlights = async (req, res) => {
       });
     }
 
-    const totalPassengers = parseInt(adultPassengers || 0) + parseInt(childPassengers || 0) + parseInt(infantPassengers || 0);
+    const totalPassengers =
+      parseInt(adultPassengers || 0) +
+      parseInt(childPassengers || 0) +
+      parseInt(infantPassengers || 0);
 
     if (totalPassengers <= 0) {
       return res.status(400).json({
