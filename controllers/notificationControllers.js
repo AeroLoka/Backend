@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const { sendMail } = require('../services/mail');
 
 const createNotification = async (req, res) => {
   const { email, type, title, detail } = req.body;
@@ -29,6 +30,8 @@ const createNotification = async (req, res) => {
         detail,
       },
     });
+
+    sendMail(email, title, detail);
 
     return res.status(201).json({
       status: 201,
