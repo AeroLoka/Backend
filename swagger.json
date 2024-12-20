@@ -76,11 +76,74 @@
           }
         ],
         "requestBody": {
-          "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/Flight"
+                "type": "object",
+                "properties": {
+                  "imageUrl": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Flight image file"
+                  },
+                  "judul": {
+                    "type": "string",
+                    "description": "Flight title"
+                  },
+                  "deskripsi": {
+                    "type": "string",
+                    "description": "Flight description"
+                  },
+                  "airlinesId": {
+                    "type": "integer",
+                    "description": "Airlines ID"
+                  },
+                  "airportId": {
+                    "type": "integer",
+                    "description": "Airport ID"
+                  },
+                  "originCityId": {
+                    "type": "integer",
+                    "description": "Origin city ID"
+                  },
+                  "destinationCityId": {
+                    "type": "integer",
+                    "description": "Destination city ID"
+                  },
+                  "departure": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Departure time"
+                  },
+                  "return": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Return time"
+                  },
+                  "price": {
+                    "type": "number",
+                    "description": "Flight price"
+                  },
+                  "capacity": {
+                    "type": "integer",
+                    "description": "Flight capacity"
+                  },
+                  "class": {
+                    "type": "string",
+                    "description": "Flight class"
+                  },
+                  "information": {
+                    "type": "string",
+                    "description": "Additional flight information"
+                  },
+                  "duration": {
+                    "type": "number",
+                    "description": "Flight duration in hours"
+                  }
+                },
+                "required": [
+                  "file", "airlinesId", "airportId", "originCityId", "destinationCityId", "departure", "return", "price", "capacity", "class", "information", "duration"
+                ]
               }
             }
           }
@@ -207,11 +270,74 @@
           }
         ],
         "requestBody": {
-          "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/Flight"
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Flight image file"
+                  },
+                  "judul": {
+                    "type": "string",
+                    "description": "Flight title"
+                  },
+                  "deskripsi": {
+                    "type": "string",
+                    "description": "Flight description"
+                  },
+                  "airlinesId": {
+                    "type": "integer",
+                    "description": "Airlines ID"
+                  },
+                  "airportId": {
+                    "type": "integer",
+                    "description": "Airport ID"
+                  },
+                  "originCityId": {
+                    "type": "integer",
+                    "description": "Origin city ID"
+                  },
+                  "destinationCityId": {
+                    "type": "integer",
+                    "description": "Destination city ID"
+                  },
+                  "departure": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Departure time"
+                  },
+                  "return": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Return time"
+                  },
+                  "price": {
+                    "type": "number",
+                    "description": "Flight price"
+                  },
+                  "capacity": {
+                    "type": "integer",
+                    "description": "Flight capacity"
+                  },
+                  "class": {
+                    "type": "string",
+                    "description": "Flight class"
+                  },
+                  "information": {
+                    "type": "string",
+                    "description": "Additional flight information"
+                  },
+                  "duration": {
+                    "type": "number",
+                    "description": "Flight duration in hours"
+                  }
+                },
+                "required": [
+                  "file", "airlinesId", "airportId", "originCityId", "destinationCityId", "departure", "return", "price", "capacity", "class", "information", "duration"
+                ]
               }
             }
           }
