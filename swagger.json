@@ -1726,11 +1726,11 @@
       }
     },
 
-    "/api/notifications/{userId}": {
+    "/api/notifications/{email}": {
       "get":{
         "tags": ["Notification"],
-        "summary": "Get notifications by user ID",
-        "description": "Get notifications by user ID",
+        "summary": "Get notifications by user email",
+        "description": "Get notifications by user email",
         "security": [
           {
             "BearerAuth": []
@@ -1738,7 +1738,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/UserId"
+            "$ref": "#/components/parameters/UserEmail"
           }
         ],
         "responses": {
@@ -1778,8 +1778,8 @@
       },
       "delete": {
         "tags": ["Notification"],
-        "summary": "Delete notifications by user ID",
-        "description": "Delete all read notifications for a specific user ID.",
+        "summary": "Delete notifications by user email",
+        "description": "Delete all read notifications for a specific user email",
         "security": [
           {
             "BearerAuth": []
@@ -1787,7 +1787,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/UserId"
+            "$ref": "#/components/parameters/UserEmail"
           }
         ],
         "responses": {
@@ -1803,24 +1803,13 @@
               }
             }
           },
-          "400": {
-            "description": "Invalid user ID",
-            "content": {
-              "application/json": {
-                "example": {
-                  "status": 400,
-                  "message": "Invalid user ID"
-                }
-              }
-            }
-          },
           "404": {
-            "description": "User not found",
+            "description": "No read notifications found for the specified user email",
             "content": {
               "application/json": {
                 "example": {
                   "status": 404,
-                  "message": "No read notifications found for the specified user ID"
+                  "message": "No read notifications found for the specified user email"
                 }
               }
             }
@@ -1839,11 +1828,11 @@
       }
     },
 
-    "/api/notifications/count/{userId}": {
+    "/api/notifications/count/{email}": {
       "get": {
         "tags": ["Notification"],
-        "summary": "Get count of notifications by user ID",
-        "description": "Get count of notifications by user ID",
+        "summary": "Get count of notifications by user email",
+        "description": "Get count of notifications by user email",
         "security": [
           {
             "BearerAuth": []
@@ -1851,7 +1840,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/UserId"
+            "$ref": "#/components/parameters/UserEmail"
           }
         ],
         "responses": {
@@ -1861,17 +1850,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetCountNotificationResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid user ID",
-            "content": {
-              "application/json": {
-                "example": {
-                  "status": 400,
-                  "message": "Invalid user ID"
                 }
               }
             }
@@ -1901,10 +1879,10 @@
       }
     },
 
-    "/api/notifications/filter/{userId}": {
+    "/api/notifications/filter/{email}": {
       "get": {
         "tags": ["Notification"],
-        "summary": "Filtered notifications by user ID",
+        "summary": "Filtered notifications by user email",
         "description": "Get user notifications filtered by read or unread status.",
         "security": [
           {
@@ -1913,7 +1891,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/UserId"
+            "$ref": "#/components/parameters/UserEmail"
           },
           {
             "$ref": "#/components/parameters/NotificationFilter"
@@ -1934,21 +1912,9 @@
             "description": "Bad request",
             "content": {
               "application/json": {
-                "examples": {
-                  "Invalid user ID": {
-                    "summary": "Invalid user ID",
-                    "value": {
-                      "status": 400,
-                      "message": "Invalid user ID"
-                    }
-                  },
-                  "Required filter parameter": {
-                    "summary": "Required filter parameter",
-                    "value": {
-                      "status": 400,
-                      "message": "Required filter parameter"
-                    }
-                  }
+                "example": {
+                  "status": 400,
+                  "message": "Filter must be 'read' or 'unread'"
                 }
               }
             }
@@ -1978,7 +1944,7 @@
       }
     },
 
-    "/api/notifications/read/{notificationId}": {
+    "/api/notifications/read/{id}": {
       "put": {
         "tags": ["Notification"],
         "summary": "Update notifications by user ID",
@@ -2109,17 +2075,17 @@
           "type": "integer"
         }
       },
-      "UserId": {
-        "name": "userId",
+      "UserEmail": {
+        "name": "email",
         "in": "path",
-        "description": "User ID",
+        "description": "Email",
         "required": true,
         "schema": {
-          "type": "integer"
+          "type": "string"
         }
       },
       "NotificationId": {
-        "name": "notificationId",
+        "name": "id",
         "in": "path",
         "description": "Notification ID",
         "required": true,
@@ -2710,8 +2676,8 @@
       "Notification": {
         "type": "object",
         "properties": {
-          "userId": {
-            "type": "integer"
+          "email": {
+            "type": "string"
           },
           "type": {
             "type": "string"
