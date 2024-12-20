@@ -4,6 +4,8 @@ const { generateUniqueBookingCode } = require('../utils/generateRandomCode');
 const { createPayment } = require('../services/payment');
 const prisma = new PrismaClient();
 const midtransClient = require('midtrans-client');
+const { sendMail } = require('../services/mailBooking');
+
 
 const createBooking = async (req, res) => {
   const { email, flightId, totalPrice, passengers, seats } = req.body;
@@ -136,6 +138,31 @@ const createBooking = async (req, res) => {
       where: { id: booking.id },
       data: { snap_token: token },
     });
+
+    const createNotification = await prisma.notification.create({
+      data: {
+        userId: user.id,
+        type: 'Notifikasi',
+        title: 'New Booking',
+        detail: `You have a new booking with booking code ${bookingCode}`,
+      },
+    });
+
+    const bookingDetail = {
+      name: user.name,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      bookingId: booking.id,
+      totalPrice,
+      bookingStatus: booking.status,
+      bookingCode: booking.bookingCode,
+      bookingDate: booking.bookingDate,
+      totalPassenger: passengers.length,
+      seats: updatedSeatsAndBookings.map((s) => s.seatNumber),
+      passengers: createdPassengers,
+    };
+
+    sendMail(user.email, 'New Booking', bookingDetail);
 
     return res.status(201).json({
       status: 201,
