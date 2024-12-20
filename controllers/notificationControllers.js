@@ -7,7 +7,7 @@ const createNotification = async (req, res) => {
   try {
     const userId = await prisma.user.findUnique({
       where: {
-        email: email,
+        email,
       },
       select: {
         id: true,
@@ -198,7 +198,7 @@ const deleteNotificationByEmail = async (req, res) => {
     if (deletedNotifications.count === 0) {
       return res.status(404).json({
         status: 404,
-        message: "No read notifications found for the specified user ID",
+        message: "No read notifications found for the specified user email",
       });
     }
 

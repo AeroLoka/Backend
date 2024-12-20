@@ -88,7 +88,7 @@ routes.post("/api/notifications", createNotification);
 routes.get("/api/notifications/:email", getAllNotificationByEmail);
 routes.get("/api/notifications/count/:email", getCountNotificationByEmail);
 routes.get("/api/notifications/filter/:email", filterNotification);
-routes.put("/api/notifications/:id", updateNotification);
+routes.put("/api/notifications/read/:id", updateNotification);
 routes.delete("/api/notifications/:email", deleteNotificationByEmail);
 
 routes.get(
