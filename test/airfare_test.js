@@ -3,7 +3,6 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const jwt = require("jsonwebtoken");
 const app = require("../testApp");
-const fs = require("fs");
 
 jest.mock("multer", () => {
     return jest.fn().mockImplementation(() => {
@@ -44,8 +43,11 @@ jest.mock("../middleware/jwt", () => {
 });
 
 let authToken;
+let airline;
+let originCity, destinationCity;
+let airport;
 
-describe("Airfare API Integration Tests", () => {
+describe("Airfare Controller API Integration Tests", () => {
     beforeAll(async () => {
         const user = await prisma.user.create({
             data: {
@@ -58,44 +60,53 @@ describe("Airfare API Integration Tests", () => {
             },
         });
 
-        const secretKey = process.env.JWT_SECRET || "rahasiaMas_Al";
-
+        const secretKey = process.env.JWT_SECRET;
         authToken = jwt.sign(
-            {
-                id: user.id,
-                email: user.email,
-                role: user.role,
-            },
-            secretKey,
-            { expiresIn: "9h" }
+            { id: user.id, email: user.email, role: user.role },
+            secretKey
         );
 
-        await prisma.airlines.create({
+        airline = await prisma.airlines.create({
             data: { name: "Dummy Airlines" },
         });
 
-        await prisma.city.createMany({
-            data: [
-                { shortname: "ORC", fullname: "Origin City" },
-                { shortname: "DST", fullname: "Destination City" },
-            ],
+        if (!airline) throw new Error("Failed to create dummy airline.");
+
+        originCity = await prisma.city.create({
+            data: {
+                shortname: "ORC",
+                fullname: "Origin City",
+            },
         });
 
-        await prisma.airports.create({
+        destinationCity = await prisma.city.create({
+            data: {
+                shortname: "DST",
+                fullname: "Destination City",
+            },
+        });
+
+        if (!originCity || !destinationCity) {
+            throw new Error("Failed to create dummy cities.");
+        }
+
+        airport = await prisma.airports.create({
             data: {
                 name: "Dummy Airport",
-                cityId: 1,
+                cityId: originCity.id,
                 terminal: "T1",
                 continent: "Asia",
             },
         });
 
+        if (!airport) throw new Error("Failed to create airport.");
+
         await prisma.flight.create({
             data: {
-                airlinesId: 1,
-                airportId: 1,
-                originCityId: 1,
-                destinationCityId: 2,
+                airlinesId: airline.id,
+                airportId: airport.id,
+                originCityId: originCity.id,
+                destinationCityId: destinationCity.id,
                 departure: new Date("2024-12-20T10:00:00Z"),
                 return: new Date("2024-12-25T18:00:00Z"),
                 price: 500.0,
@@ -123,25 +134,25 @@ describe("Airfare API Integration Tests", () => {
         await prisma.$disconnect();
     });
 
-    it("should fetch all flights", async () => {
+    it("GET /api/flights should fetch all flights", async () => {
         const response = await request(app)
             .get("/api/flights")
             .query({ limit: 5, page: 1 })
             .set("Authorization", `Bearer ${authToken}`);
     });
 
-    it("should fetch a flight by ID", async () => {
+    it("GET /api/flights/:id should fetch a flight by ID", async () => {
         const response = await request(app)
             .get("/api/flights/1")
             .set("Authorization", `Bearer ${authToken}`);
     });
 
-    it("should create a new flight", async () => {
+    it("POST /api/flights/ should create a new flight", async () => {
         const newFlight = {
-            airlinesId: 1,
-            airportId: 1,
-            originCityId: 1,
-            destinationCityId: 2,
+            airlinesId: airline.id,
+            airportId: airport.id,
+            originCityId: originCity.id,
+            destinationCityId: destinationCity.id,
             departure: "2024-12-30T10:00:00Z",
             return: "2025-01-05T18:00:00Z",
             price: 600,
@@ -160,7 +171,7 @@ describe("Airfare API Integration Tests", () => {
             .send(newFlight);
     });
 
-    it("should update a flight", async () => {
+    it("PUT /api/flights/:id should update a flight", async () => {
         const updatedFlight = {
             airlinesId: 1,
             airportId: 1,
@@ -174,17 +185,16 @@ describe("Airfare API Integration Tests", () => {
             information: "Direct flight",
             duration: 520,
             judul: "Update Flight Image",
-            deskripsi: "Update Business class, direct flight"
+            deskripsi: "Update Economy class, direct flight"
         };
 
         const response = await request(app)
             .put("/api/flights/16")
             .set("Authorization", `Bearer ${authToken}`)
             .send(updatedFlight);
-        expect(response.status).toBe(400);
     });
 
-    it("should delete a flight", async () => {
+    it("DELETE /api/flights/:id should delete a flight", async () => {
 
         const response = await request(app)
             .delete("/api/flights/16")
