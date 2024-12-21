@@ -1,22 +1,22 @@
-const routes = require("express").Router();
-const passport = require("../services/passport");
-const { restrict } = require("../middleware/jwt");
-const multer = require("multer");
+const routes = require('express').Router();
+const passport = require('../services/passport');
+const { restrict } = require('../middleware/jwt');
+const multer = require('multer');
 const upload = multer();
 const {
   createBooking,
   getAllBookingsByUserId,
   handlePaymentNotification,
   getBookingByBookingCode,
-} = require("../controllers/transactionController");
-const { getFlights } = require("../controllers/flightController");
+} = require('../controllers/transactionController');
+const { getFlights } = require('../controllers/flightController');
 const {
   getAllFlights,
   getFlightById,
   createFlight,
   updateFlight,
   deleteFlight,
-} = require("../controllers/airfareControllers");
+} = require('../controllers/airfareControllers');
 const {
   login,
   register,
@@ -25,16 +25,16 @@ const {
   verifyOtp,
   resendOtp,
   oauthLogin,
-} = require("../controllers/authControler");
+} = require('../controllers/authControler');
 
 const {
   getAllUsers,
   updateUser,
   deleteUser,
   getUserByEmail,
-} = require("../controllers/userController");
-const { getAllSeatByFlightId } = require("../controllers/seatController");
-const { admin } = require("../middleware/admin");
+} = require('../controllers/userController');
+const { getAllSeatByFlightId } = require('../controllers/seatController');
+const { admin } = require('../middleware/admin');
 
 const {
   createNotification,
@@ -43,65 +43,49 @@ const {
   updateNotification,
   deleteNotificationByUserId,
   filterNotification,
-} = require("../controllers/notificationControllers");
+} = require('../controllers/notificationControllers');
 
-routes.get("/api/users", getAllUsers);
-routes.get("/api/users/email", getUserByEmail);
-routes.put("/api/users", updateUser);
-routes.delete("/api/users", deleteUser);
+routes.get('/api/users', getAllUsers);
+routes.get('/api/users/email', getUserByEmail);
+routes.put('/api/users', updateUser);
+routes.delete('/api/users', deleteUser);
 
-routes.post("/api/booking", restrict, createBooking);
-routes.get("/api/booking", restrict, getBookingByBookingCode);
-routes.get("/api/booking/:userId", restrict, getAllBookingsByUserId);
-routes.post("/api/booking/notification", handlePaymentNotification);
+routes.post('/api/booking', restrict, createBooking);
+routes.get('/api/booking', restrict, getBookingByBookingCode);
+routes.get('/api/bookings', restrict, getAllBookingsByUserId);
+routes.post('/api/booking/notification', handlePaymentNotification);
 
-routes.get("/api/search-flights", getFlights);
-routes.get("/api/flights/", getAllFlights);
-routes.get("/api/flights/:id", getFlightById);
+routes.get('/api/search-flights', getFlights);
+routes.get('/api/flights/', getAllFlights);
+routes.get('/api/flights/:id', getFlightById);
 
-routes.post(
-  "/api/flights/",
-  restrict,
-  admin,
-  upload.single("imageUrl"),
-  createFlight
-);
-routes.put(
-  "/api/flights/:id",
-  restrict,
-  admin,
-  upload.single("imageUrl"),
-  updateFlight
-);
-routes.delete("/api/flights/:id", restrict, admin, deleteFlight);
+routes.post('/api/flights/', restrict, admin, upload.single('imageUrl'), createFlight);
+routes.put('/api/flights/:id', restrict, admin, upload.single('imageUrl'), updateFlight);
+routes.delete('/api/flights/:id', restrict, admin, deleteFlight);
 
-routes.get("/api/seats/:flightId", getAllSeatByFlightId);
+routes.get('/api/seats/:flightId', getAllSeatByFlightId);
 
-routes.post("/api/register", register);
-routes.post("/api/verify-otp", verifyOtp);
-routes.post("/api/resend-otp", resendOtp);
-routes.post("/api/login", login);
-routes.post("/api/forget-password", sendEmailForgetPassword);
-routes.post("/api/reset-password", resetPassword);
+routes.post('/api/register', register);
+routes.post('/api/verify-otp', verifyOtp);
+routes.post('/api/resend-otp', resendOtp);
+routes.post('/api/login', login);
+routes.post('/api/forget-password', sendEmailForgetPassword);
+routes.post('/api/reset-password', resetPassword);
 
-routes.post("/api/notifications/:userId", createNotification);
-routes.get("/api/notifications/:userId", getAllNotificationByUserId);
-routes.get("/api/notifications/count/:userId", getCountNotificationByUserId);
-routes.get("/api/notifications/filter/:userId", filterNotification);
-routes.put("/api/notifications/:id", updateNotification);
-routes.delete("/api/notifications/:userId", deleteNotificationByUserId);
+routes.post('/api/notifications/:userId', createNotification);
+routes.get('/api/notifications/:userId', getAllNotificationByUserId);
+routes.get('/api/notifications/count/:userId', getCountNotificationByUserId);
+routes.get('/api/notifications/filter/:userId', filterNotification);
+routes.put('/api/notifications/:id', updateNotification);
+routes.delete('/api/notifications/:userId', deleteNotificationByUserId);
 
 routes.get(
-  "/api/google",
-  passport.authenticate("google", {
+  '/api/google',
+  passport.authenticate('google', {
     session: false,
-    scope: ["email", "profile"],
+    scope: ['email', 'profile'],
   })
 );
-routes.get(
-  "/google/callback",
-  passport.authenticate("google", { session: false }),
-  oauthLogin
-);
+routes.get('/google/callback', passport.authenticate('google', { session: false }), oauthLogin);
 
 module.exports = routes;
