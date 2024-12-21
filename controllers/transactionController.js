@@ -172,7 +172,7 @@ const getBookingByBookingCode = async (req, res) => {
   if (!bookingCode) {
     return res.status(400).json({
       status: '400',
-      message: 'Email query parameter is required',
+      message: 'bookingCode query parameter is required',
       data: null,
     });
   }
@@ -221,9 +221,16 @@ const getBookingByBookingCode = async (req, res) => {
 };
 
 const getAllBookingsByUserId = async (req, res) => {
-  const { userId } = req.params;
-  const userIdNumber = Number(userId);
+  const { email } = req.query;
   const { from, to, bookingCode } = req.query;
+
+  if (!email) {
+    return res.status(400).json({
+      status: '400',
+      message: 'email query parameter is required',
+      data: null,
+    });
+  }
 
   if (from && isNaN(Date.parse(from))) {
     return res.status(400).json({
@@ -252,7 +259,7 @@ const getAllBookingsByUserId = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: {
-        id: userIdNumber,
+        email,
       },
     });
 
@@ -265,7 +272,7 @@ const getAllBookingsByUserId = async (req, res) => {
     }
 
     const filters = {
-      userId: userIdNumber,
+      userId: user.id,
     };
 
     if (from) {
@@ -279,10 +286,6 @@ const getAllBookingsByUserId = async (req, res) => {
         ...filters.bookingDate,
         lte: new Date(to),
       };
-    }
-
-    if (bookingCode) {
-      filters.bookingCode = bookingCode;
     }
 
     const bookings = await prisma.booking.findMany({
