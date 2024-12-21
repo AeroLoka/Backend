@@ -96,21 +96,6 @@ const getFlightById = async (req, res) => {
 };
 
 const createFlight = async (req, res) => {
-  console.log(req.body);
-  console.log(req.file, ">>>>>>====");
-
-  // Validasi request body untuk flight
-  // console.log(req);
-  // const { error } = flightSchema.validate(req.body);
-  // if (error) {
-  //   console.log("masuk error");
-  //   return res.status(400).json({
-  //     status: 400,
-  //     message: error.details[0].message,
-  //     data: null,
-  //   });
-  // }
-
   try {
     if (!req.file || req.file.size === 0) {
       return res.status(400).json({
@@ -120,17 +105,11 @@ const createFlight = async (req, res) => {
       });
     }
     let stringFile = req.file.buffer.toString("base64");
-    // console.log(stringFile, "ini string file");
     const fileName = req.body.judul || req.file.originalname;
-    // console.log(stringFile, "ini file name");
-
-    // console.log(stringFile, fileName, ">>>> INI CHECHKING");
-    // 3. Upload ke ImageKit
     const uploadImage = await imageKit.upload({
       fileName: fileName,
       file: stringFile,
     });
-    console.log(uploadImage, "===> INI uploadImage");
     const data4 = {
       judul: fileName,
       imageUrl: uploadImage.url,
@@ -154,11 +133,6 @@ const createFlight = async (req, res) => {
     const pesawat = await prisma.flight.create({
       data: data3,
     });
-    // console.log(data3, "ini dari data3");
-
-    console.log(pesawat, "ini pesawat");
-    // console.log(data3, "ini dari pesawat");
-    // // 6. Response sukses
     return res.status(201).json({
       status: 201,
       message: "Resource created successfully",
@@ -198,24 +172,17 @@ const updateFlight = async (req, res) => {
       });
     }
     let stringFile = req.file.buffer.toString("base64");
-    // console.log(stringFile, "ini string file");
     const fileName = req.body.judul || req.file.originalname;
-    // console.log(stringFile, "ini file name");
-
     const uploadImage = await imageKit.upload({
       fileName: fileName,
       file: stringFile,
     });
-    console.log(uploadImage, "===> INI dari update");
     const data4 = {
       judul: fileName,
       imageUrl: uploadImage.url,
       fileId: uploadImage.fileId,
       deskripsi: req.body.deskripsi || "deskripsi ",
     };
-    // const data4 = {
-    //   imageUrl: uploadImage.url,
-    // };
     const flight = await prisma.flight.update({
       where: { id: flightId },
       data: {
