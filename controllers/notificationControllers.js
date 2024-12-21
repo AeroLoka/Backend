@@ -1,17 +1,21 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const { sendMail } = require('../services/mail');
 
 const createNotification = async (req, res) => {
-  const { userId, type, title, detail } = req.body;
-  const userIdNumber = Number(userId);
+  const { email, type, title, detail } = req.body;
+
   try {
-    const user = await prisma.user.findUnique({
+    const userId = await prisma.user.findUnique({
       where: {
-        id: userIdNumber,
+        email,
       },
+      select: {
+        id: true,
+      }
     });
 
-    if (!user) {
+    if (!userId) {
       return res.status(404).json({
         status: 404,
         message: "User not found",
@@ -20,12 +24,14 @@ const createNotification = async (req, res) => {
 
     const notification = await prisma.notification.create({
       data: {
-        userId: userIdNumber,
+        userId: userId.id,
         type,
         title,
         detail,
       },
     });
+
+    sendMail(email, title, detail);
 
     return res.status(201).json({
       status: 201,
@@ -41,13 +47,21 @@ const createNotification = async (req, res) => {
   }
 };
 
-const getAllNotificationByUserId = async (req, res) => {
-  const { userId } = req.params;
-  const userIdNumber = Number(userId);
+const getAllNotificationByEmail = async (req, res) => {
+  const { email } = req.params;
   try {
+    const userId = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+      select: {
+        id: true,
+      },
+    })
+
     const notifications = await prisma.notification.findMany({
       where: {
-        userId: userIdNumber,
+        userId: userId.id,
       },
     });
 
@@ -77,21 +91,22 @@ const getAllNotificationByUserId = async (req, res) => {
   }
 };
 
-const getCountNotificationByUserId = async (req, res) => {
-  const { userId } = req.params;
-  const userIdNumber = Number(userId);
-
-  if (isNaN(userIdNumber)) {
-    return res.status(400).json({
-      status: 400,
-      message: "Invalid user ID",
-    });
-  }
+const getCountNotificationByEmail = async (req, res) => {
+  const { email } = req.params;
 
   try {
+    const userId = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+      select: {
+        id: true,
+      },
+    })
+
     const count = await prisma.notification.findMany({
       where: {
-        userId: userIdNumber,
+        userId: userId.id,
       },
     });
 
@@ -129,8 +144,8 @@ const getCountNotificationByUserId = async (req, res) => {
 };
 
 const updateNotification = async (req, res) => {
-  const { notificationId } = req.params;
-  const notificationIdNumber = Number(notificationId);
+  const { id } = req.params;
+  const notificationIdNumber = Number(id);
 
   if (isNaN(notificationIdNumber)) {
     return res.status(400).json({
@@ -152,8 +167,8 @@ const updateNotification = async (req, res) => {
     return res.status(200).json({
       status: 200,
       message: "Notification read successfully",
-      data: null,
     });
+
   } catch (error) {
     return res.status(500).json({
       status: 500,
@@ -163,21 +178,22 @@ const updateNotification = async (req, res) => {
   }
 };
 
-const deleteNotificationByUserId = async (req, res) => {
-  const { userId } = req.params;
-  const userIdNumber = Number(userId);
-
-  if (isNaN(userIdNumber)) {
-    return res.status(400).json({
-      status: 400,
-      message: "Invalid user ID",
-    });
-  }
+const deleteNotificationByEmail = async (req, res) => {
+  const { email } = req.params;
 
   try {
+    const userId = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+      select: {
+        id: true,
+      },
+    })
+
     const deletedNotifications = await prisma.notification.deleteMany({
       where: {
-        userId: userIdNumber,
+        userId: userId.id,
         isRead: true,
       },
     });
@@ -185,7 +201,7 @@ const deleteNotificationByUserId = async (req, res) => {
     if (deletedNotifications.count === 0) {
       return res.status(404).json({
         status: 404,
-        message: "No read notifications found for the specified user ID",
+        message: "No read notifications found for the specified user email",
       });
     }
 
@@ -204,30 +220,31 @@ const deleteNotificationByUserId = async (req, res) => {
 };
 
 const filterNotification = async (req, res) => {
-  const { userId } = req.params;
+  const { email } = req.params;
   const { isread } = req.query;
-  const userIdNumber = Number(userId);
 
-  if (!userId || isread === undefined) {
+  if (!email || isread === undefined) {
     return res.status(400).json({
       status: 400,
-      message: "UserId and isread filter are required",
-    });
-  }
-
-  if (isNaN(userIdNumber)) {
-    return res.status(400).json({
-      status: 400,
-      message: "Invalid user ID",
+      message: "email and isread filter are required",
     });
   }
 
   const isReadBoolean = isread === "true";
 
   try {
+    const userId = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+      select: {
+        id: true,
+      },
+    })
+
     const notifications = await prisma.notification.findMany({
       where: {
-        userId: userIdNumber,
+        userId: userId.id,
         isRead: isReadBoolean,
       },
     });
@@ -260,9 +277,9 @@ const filterNotification = async (req, res) => {
 
 module.exports = {
   createNotification,
-  getAllNotificationByUserId,
-  getCountNotificationByUserId,
+  getAllNotificationByEmail,
+  getCountNotificationByEmail,
   updateNotification,
-  deleteNotificationByUserId,
+  deleteNotificationByEmail,
   filterNotification,
 };
