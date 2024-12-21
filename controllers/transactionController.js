@@ -220,7 +220,7 @@ const getBookingByBookingCode = async (req, res) => {
   }
 };
 
-const getAllBookingsByUserId = async (req, res) => {
+const getAllBookingsByEmail = async (req, res) => {
   const { email } = req.query;
   const { from, to, bookingCode } = req.query;
 
@@ -405,7 +405,7 @@ const handlePaymentNotification = async (req, res) => {
 
 module.exports = {
   createBooking,
-  getAllBookingsByUserId,
+  getAllBookingsByEmail,
   handlePaymentNotification,
   getBookingByBookingCode,
 };
