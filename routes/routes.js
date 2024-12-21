@@ -84,7 +84,7 @@ routes.post("/api/login", login);
 routes.post("/api/forget-password", sendEmailForgetPassword);
 routes.post("/api/reset-password", resetPassword);
 
-routes.post("/api/notifications", restrict, createNotification);
+routes.post("/api/notifications", restrict, admin, createNotification);
 routes.get("/api/notifications/:email", restrict, getAllNotificationByEmail);
 routes.get("/api/notifications/count/:email", restrict, getCountNotificationByEmail);
 routes.get("/api/notifications/filter/:email", restrict, filterNotification);

@@ -4,7 +4,7 @@ const { generateUniqueBookingCode } = require('../utils/generateRandomCode');
 const { createPayment } = require('../services/payment');
 const prisma = new PrismaClient();
 const midtransClient = require('midtrans-client');
-const { sendMail } = require('../services/mailBooking');
+const { notificationService } = require('../services/notificationService');
 
 
 const createBooking = async (req, res) => {
@@ -139,15 +139,6 @@ const createBooking = async (req, res) => {
       data: { snap_token: token },
     });
 
-    const createNotification = await prisma.notification.create({
-      data: {
-        userId: user.id,
-        type: 'Notifikasi',
-        title: 'New Booking',
-        detail: `You have a new booking with booking code ${bookingCode}`,
-      },
-    });
-
     const bookingDetail = {
       name: user.name,
       email: user.email,
@@ -162,24 +153,18 @@ const createBooking = async (req, res) => {
       passengers: createdPassengers,
     };
 
-    sendMail(user.email, 'New Booking', bookingDetail);
+    const notification = await notificationService({
+      email: user.email,
+      type: 'Notifikasi',
+      title: 'New Booking',
+      detail: `You have a new booking with booking code ${booking.bookingCode}`,
+      detailMessage: bookingDetail,
+    })
 
     return res.status(201).json({
       status: 201,
       message: 'Booking created successfully',
-      data: {
-        name: user.name,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        bookingId: booking.id,
-        totalPrice,
-        bookingStatus: booking.status,
-        bookingCode: booking.bookingCode,
-        bookingDate: booking.bookingDate,
-        totalPassenger: passengers.length,
-        seats: updatedSeatsAndBookings.map((s) => s.seatNumber),
-        passengers: createdPassengers,
-      },
+      data: bookingDetail,
       token: token,
       redirect_url: redirect_url,
     });
@@ -412,6 +397,22 @@ const handlePaymentNotification = async (req, res) => {
         data: { status: 'cancelled' },
       });
     }
+
+    const paymentDetail = await prisma.booking.findUnique({
+      where: {
+        bookingCode: orderId
+      },
+      select: {
+        email,
+      }
+    });
+
+    const sendMailNotification = await notificationService({
+      email: paymentDetail.email,
+      type: 'Notifikasi',
+      title: 'Payment Notification',
+      detail: `Payment for booking ${paymentDetail.bookingCode} has been ${transactionStatus}`,
+    })
 
     return res.status(200).json({
       status: 200,

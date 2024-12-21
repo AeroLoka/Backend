@@ -1,43 +1,24 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const { sendMail } = require('../services/mail');
+const { notificationService } = require('../services/notificationService');
 
 const createNotification = async (req, res) => {
   const { email, type, title, detail } = req.body;
 
   try {
-    const userId = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-      select: {
-        id: true,
-      }
+    const notification = await notificationService({
+      email,
+      type,
+      title,
+      detail
     });
-
-    if (!userId) {
-      return res.status(404).json({
-        status: 404,
-        message: "User not found",
-      });
-    }
-
-    const notification = await prisma.notification.create({
-      data: {
-        userId: userId.id,
-        type,
-        title,
-        detail,
-      },
-    });
-
-    sendMail(email, title, detail);
 
     return res.status(201).json({
       status: 201,
       message: "Notification created successfully",
       data: notification,
     });
+
   } catch (error) {
     return res.status(500).json({
       status: 500,
