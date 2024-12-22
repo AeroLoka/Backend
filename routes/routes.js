@@ -6,8 +6,8 @@ const upload = multer();
 const {
   createBooking,
   getAllBookingsByUserId,
-  handlePaymentNotification,
   getBookingByBookingCode,
+  handleMidtransNotification,
 } = require("../controllers/transactionController");
 const { getFlights } = require("../controllers/flightController");
 const {
@@ -53,7 +53,7 @@ routes.delete("/api/users", deleteUser);
 routes.post("/api/booking", restrict, createBooking);
 routes.get("/api/booking", restrict, getBookingByBookingCode);
 routes.get("/api/booking/:userId", restrict, getAllBookingsByUserId);
-routes.post("/api/booking/notification", handlePaymentNotification);
+routes.post("/api/booking/notification", handleMidtransNotification);
 
 routes.get("/api/search-flights", getFlights);
 routes.get("/api/flights/", getAllFlights);
