@@ -4,14 +4,30 @@ const imageKit = require("../middleware/imageKit");
 const flightSchema = require("../validations/flightValidations");
 
 const getAllFlights = async (req, res) => {
-  const { limit = 10, page = 1 } = req.query;
-  const take = parseInt(limit);
-  const skip = (parseInt(page) - 1) * take;
+  const { limit = 10, page = 1, continent } = req.query;
+  const take = Number.isInteger(parseInt(limit)) ? parseInt(limit) : 10;
+  const skip = Number.isInteger(parseInt(page))
+    ? (parseInt(page) - 1) * take
+    : 0;
 
   try {
+    let whereCondition = {};
+
+    if (continent && continent !== "semua") {
+      whereCondition = {
+        airport: {
+          continent: {
+            equals: continent.toLowerCase(),
+            mode: "insensitive",
+          },
+        },
+      };
+    }
+
     const flights = await prisma.flight.findMany({
       skip,
       take,
+      where: whereCondition,
       include: {
         airlines: true,
         airport: true,
@@ -20,7 +36,9 @@ const getAllFlights = async (req, res) => {
       },
     });
 
-    const totalFlights = await prisma.flight.count();
+    const totalFlights = await prisma.flight.count({
+      where: whereCondition,
+    });
 
     if (flights.length === 0) {
       return res.status(404).json({
@@ -172,6 +190,7 @@ const updateFlight = async (req, res) => {
       });
     }
     let stringFile = req.file.buffer.toString("base64");
+    // console.log(stringFile, "ini string file");
     const fileName = req.body.judul || req.file.originalname;
     const uploadImage = await imageKit.upload({
       fileName: fileName,

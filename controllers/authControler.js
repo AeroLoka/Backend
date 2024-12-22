@@ -236,6 +236,13 @@ const login = async (req, res) => {
       where: {
         OR: [{ email: identifier }, { phoneNumber: identifier }],
       },
+      select: {
+        email: true,
+        name: true,
+        phoneNumber: true,
+        role: true,
+        password: true,
+      },
     });
 
     if (!user) {
@@ -256,14 +263,20 @@ const login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { email: user.email, name: user.name, role: user.role },
+      { email: user.email, name: user.name, phoneNumber: user.phoneNumber, role: user.role },
       process.env.JWT_SECRET
     );
 
     return res.status(200).json({
       status: '200',
       message: 'Login successful',
-      data: { email: user.email, name: user.name, token },
+      data: {
+        email: user.email,
+        name: user.name,
+        phoneNumber: user.phoneNumber,
+        role: user.role,
+        token,
+      },
     });
   } catch (error) {
     return res.status(500).json({
