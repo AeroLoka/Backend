@@ -4,6 +4,10 @@ const { generateUniqueBookingCode } = require('../utils/generateRandomCode');
 const { createPayment } = require('../services/payment');
 const prisma = new PrismaClient();
 const midtransClient = require('midtrans-client');
+const { notificationService } = require('../services/notificationService');
+const crypto = require('crypto');
+
+
 
 const createBooking = async (req, res) => {
   const { email, flightId, totalPrice, passengers, seats } = req.body;
@@ -137,22 +141,32 @@ const createBooking = async (req, res) => {
       data: { snap_token: token },
     });
 
+    const bookingDetail = {
+      name: user.name,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      bookingId: booking.id,
+      totalPrice,
+      bookingStatus: booking.status,
+      bookingCode: booking.bookingCode,
+      bookingDate: booking.bookingDate,
+      totalPassenger: passengers.length,
+      seats: updatedSeatsAndBookings.map((s) => s.seatNumber),
+      passengers: createdPassengers,
+    };
+
+    const notification = await notificationService({
+      email: user.email,
+      type: 'Notifikasi',
+      title: 'New Booking Notification',
+      detail: `You have a new booking with booking code ${booking.bookingCode}`,
+      detailMessage: bookingDetail,
+    })
+
     return res.status(201).json({
       status: 201,
       message: 'Booking created successfully',
-      data: {
-        name: user.name,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        bookingId: booking.id,
-        totalPrice,
-        bookingStatus: booking.status,
-        bookingCode: booking.bookingCode,
-        bookingDate: booking.bookingDate,
-        totalPassenger: passengers.length,
-        seats: updatedSeatsAndBookings.map((s) => s.seatNumber),
-        passengers: createdPassengers,
-      },
+      data: bookingDetail,
       token: token,
       redirect_url: redirect_url,
     });
@@ -330,82 +344,79 @@ const getAllBookingsByEmail = async (req, res) => {
   }
 };
 
-const handlePaymentNotification = async (req, res) => {
+const verifyMidtransSignature = (notification) => {
+  const serverKey = process.env.MIDTRANS_SERVER_KEY;
+
+  const payload = `${notification.order_id}${notification.status_code}${notification.gross_amount}${serverKey}`;
+
+  const signature = crypto.createHash('sha512').update(payload).digest('hex');
+
+  return signature;
+};
+
+const handleMidtransNotification = async (req, res) => {
+  const notification = req.body;
+
+  const calculatedSignature = verifyMidtransSignature(notification);
+  if (calculatedSignature !== notification.signature_key) {
+    return res.status(400).json({ message: 'Invalid signature' });
+  }
+
   try {
-    const notification = new midtransClient.Snap({
-      isProduction: false,
-      serverKey: process.env.MIDTRANS_SERVER_KEY,
-      clientKey: process.env.MIDTRANS_CLIENT_KEY,
+    const payment = await prisma.booking.findUnique({
+      where: { bookingCode: notification.order_id },
     });
 
-    const statusResponse = await notification.transaction.notification(req.body);
-    const orderId = statusResponse.order_id;
-    const transactionStatus = statusResponse.transaction_status;
-    const fraudStatus = statusResponse.fraud_status;
-
-    if (!orderId || !transactionStatus || !fraudStatus) {
-      return res.status(400).json({
-        status: 400,
-        message: 'Invalid notification data',
-      });
+    if (!payment) {
+      return res.status(404).json({ message: 'Payment not found' });
     }
 
-    if (transactionStatus === 'capture' || transactionStatus === 'settlement') {
-      if (fraudStatus === 'accept' || fraudStatus === 'settlement') {
-        await prisma.booking.update({
-          where: { bookingCode: orderId },
-          data: { status: 'paid' },
-        });
-        const booking = await prisma.booking.update({
-          where: {
-            bookingCode: orderId,
-          },
-          data: { status: 'paid' },
-          include: {
-            passengers: {
-              include: {
-                seat: true,
-              },
-            },
-          },
-        });
-        await Promise.all(
-          booking.passengers.map((passenger) => {
-            return prisma.seat.update({
-              where: { id: passenger.seatId },
-              data: { status: 'booked' },
-            });
-          })
-        );
-      }
-    } else if (
-      transactionStatus === 'cancel' ||
-      transactionStatus === 'deny' ||
-      transactionStatus === 'expire'
-    ) {
-      await prisma.booking.update({
-        where: { bookingCode: orderId },
-        data: { status: 'cancelled' },
-      });
+    let newStatus;
+    switch (notification.transaction_status) {
+      case 'capture':
+      case 'settlement':
+        newStatus = 'paid';
+        break;
+      case 'cancel':
+      case 'deny':
+      case 'expire':
+        newStatus = 'cancelled';
+        break;
+      default:
+        newStatus = 'unpaid';
+        break;
     }
+
+    await prisma.booking.update({
+      where: { bookingCode: notification.order_id },
+      data: { status: newStatus },
+    });
+
+    const userBooking = await prisma.booking.findUnique({
+      where: { bookingCode: notification.order_id },
+      include: { user: true },
+    });
+
+    await notificationService({
+      email: userBooking.user.email,
+      type: 'Notifikasi',
+      title: 'Payment Notification',
+      detail: `Payment for booking ${userBooking.bookingCode} has been ${notification.transaction_status}`,
+    });
 
     return res.status(200).json({
       status: 200,
       message: 'OK',
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      status: 500,
-      message: 'Error processing payment notification',
-      error: error.message,
-    });
+    console.error('Error handling Midtrans notification:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
 module.exports = {
   createBooking,
   getAllBookingsByEmail,
-  handlePaymentNotification,
   getBookingByBookingCode,
+  handleMidtransNotification,
 };
