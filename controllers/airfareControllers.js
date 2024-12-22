@@ -190,7 +190,6 @@ const updateFlight = async (req, res) => {
       });
     }
     let stringFile = req.file.buffer.toString("base64");
-    // console.log(stringFile, "ini string file");
     const fileName = req.body.judul || req.file.originalname;
     const uploadImage = await imageKit.upload({
       fileName: fileName,
