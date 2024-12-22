@@ -1,22 +1,24 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const imageKit = require('../middleware/imageKit');
-const flightSchema = require('../validations/flightValidations');
+const imageKit = require("../middleware/imageKit");
+const flightSchema = require("../validations/flightValidations");
 
 const getAllFlights = async (req, res) => {
   const { limit = 10, page = 1, continent } = req.query;
   const take = Number.isInteger(parseInt(limit)) ? parseInt(limit) : 10;
-  const skip = Number.isInteger(parseInt(page)) ? (parseInt(page) - 1) * take : 0;
+  const skip = Number.isInteger(parseInt(page))
+    ? (parseInt(page) - 1) * take
+    : 0;
 
   try {
     let whereCondition = {};
 
-    if (continent && continent !== 'semua') {
+    if (continent && continent !== "semua") {
       whereCondition = {
         airport: {
           continent: {
             equals: continent.toLowerCase(),
-            mode: 'insensitive',
+            mode: "insensitive",
           },
         },
       };
@@ -41,14 +43,14 @@ const getAllFlights = async (req, res) => {
     if (flights.length === 0) {
       return res.status(404).json({
         status: 404,
-        message: 'No flights found',
+        message: "No flights found",
         data: null,
       });
     }
 
     return res.status(200).json({
       status: 200,
-      message: 'Data retrieved successfully',
+      message: "Data retrieved successfully",
       data: flights,
       meta: {
         total: totalFlights,
@@ -61,7 +63,7 @@ const getAllFlights = async (req, res) => {
     console.error(error);
     return res.status(500).json({
       status: 500,
-      message: 'Internal Server Error',
+      message: "Internal Server Error",
       data: null,
     });
   }
@@ -73,7 +75,7 @@ const getFlightById = async (req, res) => {
     if (isNaN(flightId)) {
       return res.status(400).json({
         status: 400,
-        message: 'Invalid flight ID',
+        message: "Invalid flight ID",
         data: null,
       });
     }
@@ -91,67 +93,46 @@ const getFlightById = async (req, res) => {
     if (!flight) {
       return res.status(404).json({
         status: 404,
-        message: 'Flight not found',
+        message: "Flight not found",
         data: null,
       });
     }
 
     return res.status(200).json({
       status: 200,
-      message: 'Data retrieved successfully',
+      message: "Data retrieved successfully",
       data: flight,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       status: 500,
-      message: 'Internal Server Error',
+      message: "Internal Server Error",
       data: null,
     });
   }
 };
 
 const createFlight = async (req, res) => {
-  console.log(req.body);
-  console.log(req.file, '>>>>>>====');
-
-  // Validasi request body untuk flight
-  // console.log(req);
-  // const { error } = flightSchema.validate(req.body);
-  // if (error) {
-  //   console.log("masuk error");
-  //   return res.status(400).json({
-  //     status: 400,
-  //     message: error.details[0].message,
-  //     data: null,
-  //   });
-  // }
-
   try {
     if (!req.file || req.file.size === 0) {
       return res.status(400).json({
         status: 400,
-        message: 'Bad request - No file uploaded',
+        message: "Bad request - No file uploaded",
         data: null,
       });
     }
-    let stringFile = req.file.buffer.toString('base64');
-    // console.log(stringFile, "ini string file");
+    let stringFile = req.file.buffer.toString("base64");
     const fileName = req.body.judul || req.file.originalname;
-    // console.log(stringFile, "ini file name");
-
-    // console.log(stringFile, fileName, ">>>> INI CHECHKING");
-    // 3. Upload ke ImageKit
     const uploadImage = await imageKit.upload({
       fileName: fileName,
       file: stringFile,
     });
-    console.log(uploadImage, '===> INI uploadImage');
     const data4 = {
       judul: fileName,
       imageUrl: uploadImage.url,
       fileId: uploadImage.fileId,
-      deskripsi: req.body.deskripsi || 'deskripsi tempelan',
+      deskripsi: req.body.deskripsi || "deskripsi tempelan",
     };
     const data3 = {
       airlinesId: +req.body.airlinesId,
@@ -170,24 +151,20 @@ const createFlight = async (req, res) => {
     const pesawat = await prisma.flight.create({
       data: data3,
     });
-    // console.log(data3, "ini dari data3");
-
-    console.log(pesawat, 'ini pesawat');
-    // console.log(data3, "ini dari pesawat");
-    // // 6. Response sukses
     return res.status(201).json({
       status: 201,
-      message: 'Resource created successfully',
+      message: "Resource created successfully",
       data: {
         data3,
       },
     });
   } catch (error) {
-    console.error(error, '===> INI ERROR createFlight');
+    console.error(error, "===> INI ERROR createFlight");
 
     return res.status(500).json({
       status: 500,
-      message: 'Internal Server Error - gagal membuat data flight atau upload image',
+      message:
+        "Internal Server Error - gagal membuat data flight atau upload image",
       error: error.message,
     });
   }
@@ -208,29 +185,22 @@ const updateFlight = async (req, res) => {
     if (isNaN(flightId)) {
       return res.status(400).json({
         status: 400,
-        message: 'Invalid flight ID',
+        message: "Invalid flight ID",
         data: null,
       });
     }
-    let stringFile = req.file.buffer.toString('base64');
-    // console.log(stringFile, "ini string file");
+    let stringFile = req.file.buffer.toString("base64");
     const fileName = req.body.judul || req.file.originalname;
-    // console.log(stringFile, "ini file name");
-
     const uploadImage = await imageKit.upload({
       fileName: fileName,
       file: stringFile,
     });
-    console.log(uploadImage, '===> INI dari update');
     const data4 = {
       judul: fileName,
       imageUrl: uploadImage.url,
       fileId: uploadImage.fileId,
-      deskripsi: req.body.deskripsi || 'deskripsi ',
+      deskripsi: req.body.deskripsi || "deskripsi ",
     };
-    // const data4 = {
-    //   imageUrl: uploadImage.url,
-    // };
     const flight = await prisma.flight.update({
       where: { id: flightId },
       data: {
@@ -252,21 +222,21 @@ const updateFlight = async (req, res) => {
     if (!flight) {
       return res.status(404).json({
         status: 404,
-        message: 'Flight not found',
+        message: "Flight not found",
         data: null,
       });
     }
 
     return res.status(200).json({
       status: 200,
-      message: 'Resource updated successfully',
+      message: "Resource updated successfully",
       data: flight,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       status: 500,
-      message: 'Internal Server Error',
+      message: "Internal Server Error",
       data: null,
     });
   }
@@ -278,7 +248,7 @@ const deleteFlight = async (req, res) => {
     if (isNaN(flightId)) {
       return res.status(400).json({
         status: 400,
-        message: 'Invalid flight ID',
+        message: "Invalid flight ID",
         data: null,
       });
     }
@@ -289,21 +259,21 @@ const deleteFlight = async (req, res) => {
 
     return res.status(200).json({
       status: 200,
-      message: 'Resource deleted successfully',
+      message: "Resource deleted successfully",
       data: null,
     });
   } catch (error) {
     console.error(error);
-    if (error.code === 'P2025') {
+    if (error.code === "P2025") {
       return res.status(404).json({
         status: 404,
-        message: 'Flight not found',
+        message: "Flight not found",
         data: null,
       });
     }
     return res.status(500).json({
       status: 500,
-      message: 'Internal Server Error',
+      message: "Internal Server Error",
       data: null,
     });
   }
