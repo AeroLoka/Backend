@@ -261,7 +261,7 @@ const deleteFlight = async (req, res) => {
     return res.status(200).json({
       status: 200,
       message: "Resource deleted successfully",
-      data: flight,
+      data: null,
     });
   } catch (error) {
     console.error(error);
