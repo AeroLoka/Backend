@@ -5,9 +5,9 @@ const multer = require("multer");
 const upload = multer();
 const {
   createBooking,
-  getAllBookingsByUserId,
-  handlePaymentNotification,
   getBookingByBookingCode,
+  getAllBookingsByEmail,
+  handleMidtransNotification,
 } = require("../controllers/transactionController");
 const { getFlights } = require("../controllers/flightController");
 const {
@@ -38,12 +38,13 @@ const { admin } = require("../middleware/admin");
 
 const {
   createNotification,
-  getAllNotificationByUserId,
-  getCountNotificationByUserId,
+  getAllNotificationByEmail,
+  getCountNotificationByEmail,
   updateNotification,
-  deleteNotificationByUserId,
+  deleteNotificationByEmail,
   filterNotification,
-} = require("../controllers/notificationControllers");
+  sendNotificationTicket,
+} = require('../controllers/notificationControllers');
 
 routes.get("/api/users", getAllUsers);
 routes.get("/api/users/email", getUserByEmail);
@@ -52,8 +53,8 @@ routes.delete("/api/users", deleteUser);
 
 routes.post("/api/booking", restrict, createBooking);
 routes.get("/api/booking", restrict, getBookingByBookingCode);
-routes.get("/api/booking/:userId", restrict, getAllBookingsByUserId);
-routes.post("/api/booking/notification", handlePaymentNotification);
+routes.get("/api/bookings", restrict, getAllBookingsByEmail);
+routes.post("/api/booking/notification", handleMidtransNotification);
 
 routes.get("/api/search-flights", getFlights);
 routes.get("/api/flights/", getAllFlights);
@@ -84,12 +85,14 @@ routes.post("/api/login", login);
 routes.post("/api/forget-password", sendEmailForgetPassword);
 routes.post("/api/reset-password", resetPassword);
 
-routes.post("/api/notifications/:userId", createNotification);
-routes.get("/api/notifications/:userId", getAllNotificationByUserId);
-routes.get("/api/notifications/count/:userId", getCountNotificationByUserId);
-routes.get("/api/notifications/filter/:userId", filterNotification);
-routes.put("/api/notifications/:id", updateNotification);
-routes.delete("/api/notifications/:userId", deleteNotificationByUserId);
+routes.post("/api/notifications", restrict, admin, createNotification);
+routes.get("/api/notifications/:email", restrict, getAllNotificationByEmail);
+routes.get("/api/notifications/count/:email", restrict, getCountNotificationByEmail);
+routes.get("/api/notifications/filter/:email", restrict, filterNotification);
+routes.put("/api/notifications/read/:id", restrict, updateNotification);
+routes.delete("/api/notifications/:email", restrict, deleteNotificationByEmail);
+routes.post("/api/notifications/ticket-details", restrict, sendNotificationTicket);
+
 
 routes.get(
   "/api/google",
