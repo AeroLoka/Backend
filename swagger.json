@@ -185,6 +185,18 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 403,
+                  "message": "Forbidden. Admin access required.",
+                  "data": null
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -384,6 +396,18 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 403,
+                  "message": "Forbidden. Admin access required.",
+                  "data": null
+                }
+              }
+            }
+          },
           "404": {
             "description": "Flight not found",
             "content": {
@@ -456,6 +480,18 @@
                   "message": "Unauthorized",
                   "data": null,
                   "redirectTo": "/api/login"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 403,
+                  "message": "Forbidden. Admin access required.",
+                  "data": null
                 }
               }
             }
@@ -1671,12 +1707,12 @@
         ],
         "responses": {
           "200": {
-            "description": "User deleted successfully",
+            "description": "User deactivated successfully",
             "content": {
               "application/json": {
                 "example": {
                   "status": 200,
-                  "message": "User deleted successfully",
+                  "message": "User deactivated successfully",
                   "data": null
                 }
               }
@@ -1847,6 +1883,31 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 403,
+                  "message": "Forbidden. Admin access required.",
+                  "data": null
+                }
+              }
+            }
+          },
           "404": {
             "description": "User not found",
             "content": {
@@ -1895,6 +1956,19 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetAllNotificationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
                 }
               }
             }
@@ -1950,6 +2024,19 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
+                }
+              }
+            }
+          },
           "404": {
             "description": "No read notifications found for the specified user email",
             "content": {
@@ -1997,6 +2084,19 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetCountNotificationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
                 }
               }
             }
@@ -2066,6 +2166,19 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Notifications not found",
             "content": {
@@ -2126,6 +2239,19 @@
                 "example": {
                   "status": 400,
                   "message": "Invalid notification ID"                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
+                }
               }
             }
           },
@@ -2298,6 +2424,9 @@
           },
           "isActive": {
             "type": "boolean"
+          },
+          "role": {
+            "type": "string"
           }
         }
       },
@@ -2775,6 +2904,12 @@
           "name": {
             "type": "string"
           },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
           "token": {
             "type": "string"
           }
@@ -2811,15 +2946,15 @@
         "type": "object",
         "properties": {
           "status": {
-            "type": "integer"
+            "type": "integer",
+            "example": 200
           },
           "message": {
             "type": "string"
           },
           "data": {
-            "type": "object",
-            "properties": {
-            }
+            
+            "example" : null
           }
         }
       },
