@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for Backend/testApp.js</title>
+    <title>Code coverage report for Backend/app.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,20 +19,20 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">Backend</a> testApp.js</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">Backend</a> app.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">92.85% </span>
+                <span class="strong">82.05% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>26/28</span>
+                <span class='fraction'>32/39</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/0</span>
+                <span class='fraction'>0/1</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">92.85% </span>
+                <span class="strong">82.05% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>26/28</span>
+                <span class='fraction'>32/39</span>
             </div>
         
             
@@ -90,7 +90,22 @@
 <a name='L25'></a><a href='#L25'>25</a>
 <a name='L26'></a><a href='#L26'>26</a>
 <a name='L27'></a><a href='#L27'>27</a>
-<a name='L28'></a><a href='#L28'>28</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -117,32 +132,50 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">const express = require('express');
-const morgan = require('morgan');
-const cors = require('cors');
-const dotenv = require('dotenv');
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">const express = require("express");
+const morgan = require("morgan");
+const cors = require("cors");
+const dotenv = require("dotenv");
 &nbsp;
-if (process.env.NODE_ENV !== 'testing') {
-    dotenv.config();
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config();
 }
 &nbsp;
-const app = express();
-const router = require('./routes/routes');
+const PORT = process.env.PORT || 3001;
 &nbsp;
-const passport = require('./services/passport');
+const app = express();
+const router = require("./routes/routes");
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger.json");
+&nbsp;
+const passport = require("./services/passport");
 app.use(passport.initialize());
 &nbsp;
-app.use(morgan('dev'));
+app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
-&nbsp;
-app.use('/', router);
+app.use("/", router);
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 &nbsp;
 app.use((err, req, res, next) =&gt; {
-<span class="cstat-no" title="statement not covered" >    console.error(err.stack);</span>
-<span class="cstat-no" title="statement not covered" >    res.status(500).json({ success: false, message: err.message });</span>
+<span class="cstat-no" title="statement not covered" >  console.error(err.stack);</span>
+<span class="cstat-no" title="statement not covered" >  res.status(500).json({ success: false, message: err.message });</span>
 });
+&nbsp;
+if (require.main === module) <span class="branch-0 cbranch-no" title="branch not covered" >{</span>
+<span class="cstat-no" title="statement not covered" >  app.listen(PORT, () =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    console.log(`Server berjalan di Port ${PORT}`);</span>
+<span class="cstat-no" title="statement not covered" >    console.log(`Swagger docs tersedia di http://localhost:${PORT}/api/docs`);</span>
+<span class="cstat-no" title="statement not covered" >  });</span>
+<span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;
 module.exports = app;</pre></td></tr></table></pre>
 
@@ -151,7 +184,7 @@ module.exports = app;</pre></td></tr></table></pre>
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2024-12-23T13:25:39.802Z
+                at 2024-12-23T13:44:53.882Z
             </div>
         <script src="../prettify.js"></script>
         <script>

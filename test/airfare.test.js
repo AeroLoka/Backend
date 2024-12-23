@@ -2,7 +2,7 @@ const request = require("supertest");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const jwt = require("jsonwebtoken");
-const app = require("../testApp");
+const app = require("../app");
 
 jest.mock("multer", () => {
     return jest.fn().mockImplementation(() => {
@@ -34,7 +34,7 @@ jest.mock("../middleware/jwt", () => {
         restrict: jest.fn((req, res, next) => {
             req.user = {
                 id: 1,
-                email: "devialditest@mail.com",
+                email: "airfaretest@mail.com",
                 role: "admin",
             };
             next();
@@ -51,8 +51,8 @@ describe("Airfare Controller API Integration Tests", () => {
     beforeAll(async () => {
         const user = await prisma.user.create({
             data: {
-                name: "Devialdi Maisa Putra",
-                email: "devialditest@mail.com",
+                name: "Airfare Testing",
+                email: "airfaretest@mail.com",
                 phoneNumber: "1234567890",
                 password: "password123",
                 isActive: true,
