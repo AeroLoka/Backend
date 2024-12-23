@@ -2,14 +2,14 @@ const request = require("supertest");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const jwt = require("jsonwebtoken");
-const app = require("../testApp");
+const app = require("../app");
 
 jest.mock("../middleware/jwt", () => {
     return {
         restrict: jest.fn((req, res, next) => {
             req.user = {
                 id: 1,
-                email: "devialdiuser@mail.com",
+                email: "testinguser@mail.com",
                 role: "user",
             };
             next();
@@ -23,8 +23,8 @@ describe("User Controller API Integration Tests", () => {
     beforeAll(async () => {
         await prisma.user.create({
             data: {
-                name: "Devialdi Maisa Putra",
-                email: "devialdiuser@mail.com",
+                name: "Testing User",
+                email: "testinguser@mail.com",
                 phoneNumber: "1234567890",
                 password: "password321",
                 isActive: true,
@@ -34,7 +34,7 @@ describe("User Controller API Integration Tests", () => {
 
         const secretKey = process.env.JWT_SECRET;
         authToken = jwt.sign(
-            { id: 1, email: "devialdiuser@mail.com", role: "user" },
+            { id: 1, email: "testinguser@mail.com", role: "user" },
             secretKey
         );
     });
@@ -59,25 +59,25 @@ describe("User Controller API Integration Tests", () => {
 
     it("GET /api/users/email should retrieve a user by email", async () => {
         const response = await request(app)
-            .get(`/api/users/email?email=devialdiuser@mail.com`)
+            .get(`/api/users/email?email=testinguser@mail.com`)
             .set("Authorization", `Bearer ${authToken}`);
 
         expect(response.status).toBe(200);
         expect(response.body.status).toBe("200");
-        expect(response.body.data.email).toBe("devialdiuser@mail.com");
+        expect(response.body.data.email).toBe("testinguser@mail.com");
     });
 
     it("PUT /api/users should update a user", async () => {
         const updatedUserData = {
             name: "Updated Name",
-            email: "devialdiuser@mail.com",
+            email: "testinguser@mail.com",
             phoneNumber: "9876543210",
         };
 
         const response = await request(app)
             .put("/api/users")
             .set("Authorization", `Bearer ${authToken}`)
-            .query({ email: "devialdiuser@mail.com" })
+            .query({ email: "testinguser@mail.com" })
             .send(updatedUserData);
 
         expect(response.status).toBe(200);
@@ -90,13 +90,13 @@ describe("User Controller API Integration Tests", () => {
         const response = await request(app)
             .delete("/api/users")
             .set("Authorization", `Bearer ${authToken}`)
-            .query({ email: "devialdiuser@mail.com"});
+            .query({ email: "testinguser@mail.com"});
 
         expect(response.status).toBe(200);
         expect(response.body.status).toBe("200");
 
         const user = await prisma.user.findUnique({
-            where: { email: "devialdiuser@mail.com"},
+            where: { email: "testinguser@mail.com"},
         });
         expect(user.isActive).toBe(false);
     });

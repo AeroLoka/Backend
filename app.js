@@ -29,7 +29,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: err.message });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server berjalan di Port ${PORT}`);
-  console.log(`Swagger docs available at http://localhost:${PORT}/api/docs`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server berjalan di Port ${PORT}`);
+    console.log(`Swagger docs tersedia di http://localhost:${PORT}/api/docs`);
+  });
+}
+
+module.exports = app;
