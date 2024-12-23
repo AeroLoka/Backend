@@ -2267,6 +2267,89 @@
           }
         }
       }
+    },
+
+    "/api/notifications/ticket-details": {
+      "post": {
+        "tags": ["Notification"],
+        "summary": "Send notification for ticket details",
+        "description": "Send notification for ticket details",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "User's email address"
+                  },
+                  "bookingCode": {
+                    "type": "string",
+                    "description": "Booking code for the reservation"
+                  }
+                },
+                "required": ["email", "bookingCode"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notifications sent",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 200,
+                  "message": "Notification sent successfully",
+                  "data": null
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email and booking code are required",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Email and booking code are required",
+                  "data": null
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500"
+                }
+              }
+            }
+          }
+        }
+      }
     }
     
   
