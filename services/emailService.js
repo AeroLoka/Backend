@@ -12,7 +12,7 @@ const generateBookingEmailTemplate = (bookingDetail) => {
                 <ul style="list-style-type: none; padding: 0; font-size: 16px; line-height: 1.6;">
                     <li><strong>Booking Code:</strong> ${bookingDetail.bookingCode}</li>
                     <li><strong>Booking Date:</strong> ${bookingDetail.bookingDate}</li>
-                    <li><strong>Total Price:</strong> $${bookingDetail.totalPrice}</li>
+                    <li><strong>Total Price:</strong> ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(bookingDetail.totalPrice).replace('IDR', '').trim()}</li>
                     <li><strong>Booking Status:</strong> ${bookingDetail.bookingStatus}</li>
                     <li><strong>Total Passengers:</strong> ${bookingDetail.totalPassenger}</li>
                 </ul>
