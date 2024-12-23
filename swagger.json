@@ -76,11 +76,75 @@
           }
         ],
         "requestBody": {
-          "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/Flight"
+                "type": "object",
+                "properties": {
+                  "imageUrl": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Flight image file"
+                  },
+                  "judul": {
+                    "type": "string",
+                    "description": "Flight title"
+                  },
+                  "deskripsi": {
+                    "type": "string",
+                    "description": "Flight description"
+                  },
+                  "airlinesId": {
+                    "type": "integer",
+                    "description": "Airlines ID"
+                  },
+                  "airportId": {
+                    "type": "integer",
+                    "description": "Airport ID"
+                  },
+                  "originCityId": {
+                    "type": "integer",
+                    "description": "Origin city ID"
+                  },
+                  "destinationCityId": {
+                    "type": "integer",
+                    "description": "Destination city ID"
+                  },
+                  "departure": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Departure time"
+                  },
+                  "return": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Return time"
+                  },
+                  "price": {
+                    "type": "number",
+                    "description": "Flight price"
+                  },
+                  "capacity": {
+                    "type": "integer",
+                    "description": "Flight capacity"
+                  },
+                  "class": {
+                    "type": "string",
+                    "description": "Flight class",
+                    "enum": ["economy", "business", "first"]
+                  },
+                  "information": {
+                    "type": "string",
+                    "description": "Additional flight information"
+                  },
+                  "duration": {
+                    "type": "number",
+                    "description": "Flight duration in hours"
+                  }
+                },
+                "required": [
+                  "imageUrl", "airlinesId", "airportId", "originCityId", "destinationCityId", "departure", "return", "price", "capacity", "class", "information", "duration"
+                ]
               }
             }
           }
@@ -117,6 +181,18 @@
                   "message": "Unauthorized",
                   "data": null,
                   "redirectTo": "/api/login"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 403,
+                  "message": "Forbidden. Admin access required.",
+                  "data": null
                 }
               }
             }
@@ -207,11 +283,66 @@
           }
         ],
         "requestBody": {
-          "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/Flight"
+                "type": "object",
+                "properties": {
+                  "imageUrl": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Flight image file"
+                  },
+                  "airlinesId": {
+                    "type": "integer",
+                    "description": "Airlines ID"
+                  },
+                  "airportId": {
+                    "type": "integer",
+                    "description": "Airport ID"
+                  },
+                  "originCityId": {
+                    "type": "integer",
+                    "description": "Origin city ID"
+                  },
+                  "destinationCityId": {
+                    "type": "integer",
+                    "description": "Destination city ID"
+                  },
+                  "departure": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Departure time"
+                  },
+                  "return": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Return time"
+                  },
+                  "price": {
+                    "type": "number",
+                    "description": "Flight price"
+                  },
+                  "capacity": {
+                    "type": "integer",
+                    "description": "Flight capacity"
+                  },
+                  "class": {
+                    "type": "string",
+                    "description": "Flight class"
+                  },
+                  "information": {
+                    "type": "string",
+                    "description": "Additional flight information"
+                  },
+                  "duration": {
+                    "type": "number",
+                    "description": "Flight duration in hours"
+                  }
+                },
+                "required": [
+                  "imageUrl", "airlinesId", "airportId", "originCityId", "destinationCityId", "departure", "return", "price", "capacity", "class", "information", "duration"
+                ]
               }
             }
           }
@@ -261,6 +392,18 @@
                   "message": "Unauthorized",
                   "data": null,
                   "redirectTo": "/api/login"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 403,
+                  "message": "Forbidden. Admin access required.",
+                  "data": null
                 }
               }
             }
@@ -337,6 +480,18 @@
                   "message": "Unauthorized",
                   "data": null,
                   "redirectTo": "/api/login"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 403,
+                  "message": "Forbidden. Admin access required.",
+                  "data": null
                 }
               }
             }
@@ -537,10 +692,10 @@
       }
     },
 
-    "/api/booking/{userId}": {
+    "/api/bookings": {
       "get": {
         "tags": ["Bookings"],
-        "summary": "Get bookings by user ID",
+        "summary": "Get all bookings by user email",
         "description": "Retrieve a list of bookings for a specific user",
         "security": [
           {
@@ -549,12 +704,32 @@
         ],
         "parameters": [
           {
-            "name": "userId",
-            "in": "path",
-            "description": "ID of the user",
+            "name": "email",
+            "in": "query",
+            "description": "User email",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "From date (format: YYYY-MM-DD)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "To date (format: YYYY-MM-DD)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
             }
           }
         ],
@@ -570,15 +745,15 @@
             }
           },
           "400": {
-            "description": "Invalid user ID",
+            "description": "Bad request",
             "content": {
               "application/json": {
                 "examples": {
-                  "Invalid from date format": {
-                    "summary": "Invalid from date format",
+                  "Email query parameter is required": {
+                    "summary": "email query parameter is required",
                     "value": {
                       "status": 400,
-                      "message": "Invalid from date format",
+                      "message": "email query parameter is required",
                       "data": null
                     }
                   },
@@ -587,6 +762,14 @@
                     "value": {
                       "status": 400,
                       "message": "Invalid to date format",
+                      "data": null
+                    }
+                  },
+                  "Invalid from date format": {
+                    "summary": "Invalid from date format",
+                    "value": {
+                      "status": 400,
+                      "message": "Invalid from date format",
                       "data": null
                     }
                   },
@@ -1524,12 +1707,12 @@
         ],
         "responses": {
           "200": {
-            "description": "User deleted successfully",
+            "description": "User deactivated successfully",
             "content": {
               "application/json": {
                 "example": {
                   "status": 200,
-                  "message": "User deleted successfully",
+                  "message": "User deactivated successfully",
                   "data": null
                 }
               }
@@ -1700,6 +1883,31 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 403,
+                  "message": "Forbidden. Admin access required.",
+                  "data": null
+                }
+              }
+            }
+          },
           "404": {
             "description": "User not found",
             "content": {
@@ -1726,11 +1934,11 @@
       }
     },
 
-    "/api/notifications/{userId}": {
+    "/api/notifications/{email}": {
       "get":{
         "tags": ["Notification"],
-        "summary": "Get notifications by user ID",
-        "description": "Get notifications by user ID",
+        "summary": "Get notifications by user email",
+        "description": "Get notifications by user email",
         "security": [
           {
             "BearerAuth": []
@@ -1738,7 +1946,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/UserId"
+            "$ref": "#/components/parameters/UserEmail"
           }
         ],
         "responses": {
@@ -1748,6 +1956,19 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetAllNotificationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
                 }
               }
             }
@@ -1778,8 +1999,8 @@
       },
       "delete": {
         "tags": ["Notification"],
-        "summary": "Delete notifications by user ID",
-        "description": "Delete all read notifications for a specific user ID.",
+        "summary": "Delete notifications by user email",
+        "description": "Delete all read notifications for a specific user email",
         "security": [
           {
             "BearerAuth": []
@@ -1787,7 +2008,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/UserId"
+            "$ref": "#/components/parameters/UserEmail"
           }
         ],
         "responses": {
@@ -1803,24 +2024,26 @@
               }
             }
           },
-          "400": {
-            "description": "Invalid user ID",
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "example": {
-                  "status": 400,
-                  "message": "Invalid user ID"
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
                 }
               }
             }
           },
           "404": {
-            "description": "User not found",
+            "description": "No read notifications found for the specified user email",
             "content": {
               "application/json": {
                 "example": {
                   "status": 404,
-                  "message": "No read notifications found for the specified user ID"
+                  "message": "No read notifications found for the specified user email"
                 }
               }
             }
@@ -1839,11 +2062,11 @@
       }
     },
 
-    "/api/notifications/count/{userId}": {
+    "/api/notifications/count/{email}": {
       "get": {
         "tags": ["Notification"],
-        "summary": "Get count of notifications by user ID",
-        "description": "Get count of notifications by user ID",
+        "summary": "Get count of notifications by user email",
+        "description": "Get count of notifications by user email",
         "security": [
           {
             "BearerAuth": []
@@ -1851,7 +2074,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/UserId"
+            "$ref": "#/components/parameters/UserEmail"
           }
         ],
         "responses": {
@@ -1865,13 +2088,15 @@
               }
             }
           },
-          "400": {
-            "description": "Invalid user ID",
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "example": {
-                  "status": 400,
-                  "message": "Invalid user ID"
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
                 }
               }
             }
@@ -1901,10 +2126,10 @@
       }
     },
 
-    "/api/notifications/filter/{userId}": {
+    "/api/notifications/filter/{email}": {
       "get": {
         "tags": ["Notification"],
-        "summary": "Filtered notifications by user ID",
+        "summary": "Filtered notifications by user email",
         "description": "Get user notifications filtered by read or unread status.",
         "security": [
           {
@@ -1913,7 +2138,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/UserId"
+            "$ref": "#/components/parameters/UserEmail"
           },
           {
             "$ref": "#/components/parameters/NotificationFilter"
@@ -1934,21 +2159,22 @@
             "description": "Bad request",
             "content": {
               "application/json": {
-                "examples": {
-                  "Invalid user ID": {
-                    "summary": "Invalid user ID",
-                    "value": {
-                      "status": 400,
-                      "message": "Invalid user ID"
-                    }
-                  },
-                  "Required filter parameter": {
-                    "summary": "Required filter parameter",
-                    "value": {
-                      "status": 400,
-                      "message": "Required filter parameter"
-                    }
-                  }
+                "example": {
+                  "status": 400,
+                  "message": "Filter must be 'read' or 'unread'"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
                 }
               }
             }
@@ -1978,7 +2204,7 @@
       }
     },
 
-    "/api/notifications/read/{notificationId}": {
+    "/api/notifications/read/{id}": {
       "put": {
         "tags": ["Notification"],
         "summary": "Update notifications by user ID",
@@ -1995,12 +2221,12 @@
         ],
         "responses": {
           "200": {
-            "description": "Notification updated successfully",
+            "description": "Notification read successfully",
             "content": {
               "application/json": {
                 "example": {
                   "status": 200,
-                  "message": "Notification updated successfully",
+                  "message": "Notification reas successfully",
                   "data": null
                 }
               }
@@ -2013,6 +2239,19 @@
                 "example": {
                   "status": 400,
                   "message": "Invalid notification ID"                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Unauthorized",
+                  "data": null,
+                  "redirectTo": "/api/login"
+                }
               }
             }
           },
@@ -2109,17 +2348,17 @@
           "type": "integer"
         }
       },
-      "UserId": {
-        "name": "userId",
+      "UserEmail": {
+        "name": "email",
         "in": "path",
-        "description": "User ID",
+        "description": "Email",
         "required": true,
         "schema": {
-          "type": "integer"
+          "type": "string"
         }
       },
       "NotificationId": {
-        "name": "notificationId",
+        "name": "id",
         "in": "path",
         "description": "Notification ID",
         "required": true,
@@ -2185,6 +2424,9 @@
           },
           "isActive": {
             "type": "boolean"
+          },
+          "role": {
+            "type": "string"
           }
         }
       },
@@ -2287,6 +2529,9 @@
           },
           "duration": {
             "type": "string"
+          },
+          "imageUrl": {
+            "type": "string"
           }
         }
       },
@@ -2296,7 +2541,7 @@
           "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Flight"
+              "$ref": "#/components/schemas/GetFlightResponse"
             }
           },
           "meta": {
@@ -2659,6 +2904,12 @@
           "name": {
             "type": "string"
           },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
           "token": {
             "type": "string"
           }
@@ -2695,23 +2946,23 @@
         "type": "object",
         "properties": {
           "status": {
-            "type": "integer"
+            "type": "integer",
+            "example": 200
           },
           "message": {
             "type": "string"
           },
           "data": {
-            "type": "object",
-            "properties": {
-            }
+            
+            "example" : null
           }
         }
       },
       "Notification": {
         "type": "object",
         "properties": {
-          "userId": {
-            "type": "integer"
+          "email": {
+            "type": "string"
           },
           "type": {
             "type": "string"
